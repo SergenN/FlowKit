@@ -1,4 +1,4 @@
-import { useVueFlow } from './useVueFlow'
+import { useFlowJs } from './useFlowJS'
 
 /**
  * Composable for accessing the currently ongoing connection.
@@ -12,7 +12,7 @@ export function useConnection() {
     connectionEndHandle: endHandle,
     connectionStatus: status,
     connectionPosition: position,
-  } = useVueFlow()
+  } = useFlowJs();
 
   return {
     startHandle,

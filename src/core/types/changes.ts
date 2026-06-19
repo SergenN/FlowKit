@@ -3,16 +3,16 @@ import type { GraphNode, Node, NodeHandleBounds } from './node'
 import type { GraphEdge } from './edge'
 
 export interface NodeDragItem {
-  id: string
+  id: string;
   // relative node position (to parent)
-  position: XYPosition
+  position: XYPosition;
   // distance from the mouse cursor to the node when start dragging
-  distance: XYPosition
-  dimensions: Dimensions
-  from: XYPosition
-  extent?: Node['extent']
-  parentNode?: string
-  expandParent?: boolean
+  distance: XYPosition;
+  dimensions: Dimensions;
+  from: XYPosition;
+  extent?: Node['extent'];
+  parentId?: string;
+  expandParent?: boolean;
 }
 
 export interface NodeDimensionChange {

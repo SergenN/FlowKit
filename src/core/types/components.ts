@@ -1,39 +1,103 @@
-import type { CSSProperties, Component, DefineComponent, VNode } from 'vue'
-import type { BezierEdge, SimpleBezierEdge, SmoothStepEdge, StepEdge, StraightEdge } from '../components'
-import type { NodeProps } from './node'
-import type { EdgeProps } from './edge'
+// components.ts
 
-/** Global component names are components registered to the vue instance and are "autoloaded" by their string name */
-type GlobalComponentName = string
+import type { NodeProps } from './node';
+import type { EdgeProps } from './edge';
 
-/** Node Components can either be a component definition or a string name */
-export type NodeComponent = Component<NodeProps> | DefineComponent<NodeProps, any, any, any, any> | GlobalComponentName
+// ─── Rendering abstractions ──────────────────────────────────────────────────
 
-export type NodeTypesObject = { [key in keyof DefaultNodeTypes]?: NodeComponent } & Record<string, NodeComponent>
+/**
+ * A registered custom element tag name (e.g. "my-node", "bezier-edge").
+ * Must contain a hyphen per the Custom Elements spec.
+ */
+type CustomElementTagName = string;
 
-export type EdgeTypesObject = { [key in keyof DefaultEdgeTypes]?: EdgeComponent } & Record<string, EdgeComponent>
+/**
+ * A plain render function — receives props, returns an HTMLElement or SVGElement.
+ * Framework-agnostic equivalent of a functional component.
+ */
+export type NodeRenderFn = (
+  props: NodeProps,
+) => HTMLElement | SVGElement | DocumentFragment;
 
-/** Edge Components can either be a component definition or a string name */
-export type EdgeComponent = Component<EdgeProps> | DefineComponent<EdgeProps, any, any, any, any, any> | GlobalComponentName
+export type EdgeRenderFn = (props: EdgeProps) => SVGElement | DocumentFragment;
+
+/**
+ * A constructable element class (e.g. a class extending HTMLElement).
+ */
+export type NodeElementConstructor = new () => HTMLElement;
+
+export type EdgeElementConstructor = new () => SVGElement | HTMLElement;
+
+// ─── Component union types ────────────────────────────────────────────────────
+
+/**
+ * A node component can be:
+ * - A custom element tag name (string, registered via customElements.define)
+ * - A render function
+ * - A custom element constructor
+ */
+export type NodeComponent =
+  | CustomElementTagName
+  | NodeRenderFn
+  | NodeElementConstructor;
+
+/**
+ * An edge component can be:
+ * - A custom element tag name
+ * - A render function
+ * - A custom element constructor
+ */
+export type EdgeComponent =
+  | CustomElementTagName
+  | EdgeRenderFn
+  | EdgeElementConstructor;
+
+// ─── Type registries ──────────────────────────────────────────────────────────
+
+export type NodeTypesObject = {
+  [key in keyof DefaultNodeTypes]?: NodeComponent;
+} & Record<string, NodeComponent>;
+
+export type EdgeTypesObject = {
+  [key in keyof DefaultEdgeTypes]?: EdgeComponent;
+} & Record<string, EdgeComponent>;
+
+// ─── Default type maps ────────────────────────────────────────────────────────
 
 export interface DefaultEdgeTypes {
-  default: typeof BezierEdge
-  straight: typeof StraightEdge
-  simplebezier: typeof SimpleBezierEdge
-  step: typeof StepEdge
-  smoothstep: typeof SmoothStepEdge
+  default: EdgeComponent; // bezier
+  straight: EdgeComponent;
+  simplebezier: EdgeComponent;
+  step: EdgeComponent;
+  smoothstep: EdgeComponent;
 }
 
-export type DefaultNodeTypes = { [key in 'input' | 'output' | 'default']: NodeComponent }
+export type DefaultNodeTypes = {
+  [key in 'input' | 'output' | 'default']: NodeComponent;
+};
 
-/** these props are passed to edge texts */
+// ─── Edge label / text props ──────────────────────────────────────────────────
+
+/**
+ * Style is expressed as a plain CSSStyleDeclaration-compatible object
+ * rather than Vue's CSSProperties.
+ */
+export type StyleObject = Partial<CSSStyleDeclaration>;
+
+/**
+ * Label content: a plain string, an HTMLElement/SVGElement node, or a raw object
+ * passed through to the renderer.
+ */
+export type LabelContent = string | HTMLElement | SVGElement | object;
+
+/** Props passed to edge label/text renderers */
 export interface EdgeTextProps {
-  x: number
-  y: number
-  label?: string | VNode | object
-  labelStyle?: CSSProperties
-  labelShowBg?: boolean
-  labelBgStyle?: CSSProperties
-  labelBgPadding?: [number, number]
-  labelBgBorderRadius?: number
+  x: number;
+  y: number;
+  label?: LabelContent;
+  labelStyle?: StyleObject;
+  labelShowBg?: boolean;
+  labelBgStyle?: StyleObject;
+  labelBgPadding?: [number, number];
+  labelBgBorderRadius?: number;
 }

@@ -1,4 +1,4 @@
-export { default as DefaultNode } from './DefaultNode'
-export { default as InputNode } from './InputNode'
-export { default as OutputNode } from './OutputNode'
-export { default as NodeWrapper } from './NodeWrapper'
+export { DefaultNodeElement as DefaultNode } from './defaultNode';
+export { InputNodeElement as InputNode } from './inputNode';
+export { OutputNodeElement as OutputNode } from './outputNode';
+export { NodeWrapperElement as NodeWrapper } from './nodeWrapper';

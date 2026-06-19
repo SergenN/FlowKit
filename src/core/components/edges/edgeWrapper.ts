@@ -1,389 +1,499 @@
-import { computed, defineComponent, getCurrentInstance, h, inject, provide, ref, resolveComponent, toRef } from 'vue'
-import type { Connection, EdgeComponent, HandleType, MouseTouchEvent } from '../../types'
-import { ConnectionMode, Position } from '../../types'
-import { useEdgeHooks, useHandle, useVueFlow } from '../../composables'
-import { EdgeId, EdgeRef, Slots } from '../../context'
+import type { Connection, HandleType, MouseTouchEvent } from '../../types';
+import { ConnectionMode, Position } from '../../types';
+import { useEdgeHooks, useHandle, useFlowJs } from '../../composables';
 import {
   ARIA_EDGE_DESC_KEY,
   ErrorCode,
-  VueFlowError,
+  FlowJsError,
   elementSelectionKeys,
   getEdgeHandle,
   getHandlePosition,
   getMarkerId,
-} from '../../utils'
-import EdgeAnchor from './EdgeAnchor'
+} from '../../utils';
+import {
+  getBezierPath,
+  getSmoothStepPath,
+  getSimpleBezierPath,
+  getStraightPath,
+} from './utils';
 
-interface Props {
-  id: string
-}
+export class EdgeWrapperElement extends HTMLElement {
+  private store!: ReturnType<typeof useFlowJs>;
+  private edgeId!: string;
+  private cleanups: (() => void)[] = [];
 
-const EdgeWrapper = defineComponent({
-  name: 'Edge',
-  compatConfig: { MODE: 3 },
-  props: ['id'],
-  setup(props: Props) {
-    const {
-      id: vueFlowId,
-      addSelectedEdges,
-      connectionMode,
-      edgeUpdaterRadius,
-      emits,
-      nodesSelectionActive,
-      noPanClassName,
-      getEdgeTypes,
-      removeSelectedEdges,
-      findEdge,
-      findNode,
-      isValidConnection,
-      multiSelectionActive,
-      disableKeyboardA11y,
-      elementsSelectable,
-      edgesUpdatable,
-      edgesFocusable,
-      hooks,
-    } = useVueFlow()
+  // private mouseOver = false;
+  // private updating = false;
+  private nodeId = '';
+  private handleId: string | null = null;
+  private edgeUpdaterType: HandleType = 'source';
 
-    const edge = computed(() => findEdge(props.id)!)
+  private emit!: ReturnType<typeof useEdgeHooks>['emit'];
+  // private handlePointerDown!: (event: MouseTouchEvent) => void;
 
-    const { emit, on } = useEdgeHooks(edge.value, emits)
+  // The SVG <g> injected directly into the parent <svg>
+  private g: SVGGElement | null = null;
+  // Keep references to the paths so we can update them in-place during drag
+  private pathEl: SVGPathElement | null = null;
+  private interactionEl: SVGPathElement | null = null;
+  private labelFo: SVGForeignObjectElement | null = null;
 
-    const slots = inject(Slots)
+  connectedCallback() {
+    this.store = useFlowJs();
+    this.edgeId = this.getAttribute('id') ?? '';
+    this.style.display = 'none';
 
-    const instance = getCurrentInstance()
+    this.setup();
+    this.render();
 
-    const mouseOver = ref(false)
+    // Re-compute path when connected nodes move (drag)
+    const onNodesChange = (changes: any[]) => {
+      const edge = this.edge;
+      if (!edge) return;
+      const relevant = changes.some(
+        (c) =>
+          c.type === 'position' &&
+          (c.id === edge.source || c.id === edge.target),
+      );
+      if (relevant) this.updatePath();
+    };
+    this.store.onNodesChange(onNodesChange);
+    this.cleanups.push(() => this.store.hooks.nodesChange.off(onNodesChange));
+  }
 
-    const updating = ref(false)
+  disconnectedCallback() {
+    this.g?.remove();
+    this.g = null;
+    for (const cleanup of this.cleanups) {
+      cleanup();
+    }
+    this.cleanups = [];
+  }
 
-    const nodeId = ref('')
+  private get edge() {
+    return this.store.findEdge(this.edgeId)!;
+  }
 
-    const handleId = ref<string | null>(null)
+  private get isSelectable() {
+    return typeof this.edge?.selectable === 'undefined'
+      ? this.store.elementsSelectable
+      : this.edge.selectable;
+  }
 
-    const edgeUpdaterType = ref<HandleType>('source')
+  // private get isUpdatable() {
+  //   return typeof this.edge?.updatable === 'undefined'
+  //     ? this.store.edgesUpdatable
+  //     : this.edge.updatable;
+  // }
 
-    const edgeEl = ref<SVGElement | null>(null)
+  private get isFocusable() {
+    return typeof this.edge?.focusable === 'undefined'
+      ? this.store.edgesFocusable
+      : this.edge.focusable;
+  }
 
-    const isSelectable = toRef(() =>
-      typeof edge.value.selectable === 'undefined' ? elementsSelectable.value : edge.value.selectable,
-    )
-
-    const isUpdatable = toRef(() => (typeof edge.value.updatable === 'undefined' ? edgesUpdatable.value : edge.value.updatable))
-
-    const isFocusable = toRef(() => (typeof edge.value.focusable === 'undefined' ? edgesFocusable.value : edge.value.focusable))
-
-    provide(EdgeId, props.id)
-    provide(EdgeRef, edgeEl)
-
-    const edgeClass = computed(() => (edge.value.class instanceof Function ? edge.value.class(edge.value) : edge.value.class))
-    const edgeStyle = computed(() => (edge.value.style instanceof Function ? edge.value.style(edge.value) : edge.value.style))
-
-    const edgeCmp = computed(() => {
-      const name = edge.value.type || 'default'
-
-      const slot = slots?.[`edge-${name}`]
-      if (slot) {
-        return slot
-      }
-
-      let edgeType = edge.value.template ?? getEdgeTypes.value[name]
-
-      if (typeof edgeType === 'string') {
-        if (instance) {
-          const components = Object.keys(instance.appContext.components)
-          if (components && components.includes(name)) {
-            edgeType = resolveComponent(name, false) as EdgeComponent
-          }
-        }
-      }
-
-      if (edgeType && typeof edgeType !== 'string') {
-        return edgeType
-      }
-
-      emits.error(new VueFlowError(ErrorCode.EDGE_TYPE_MISSING, edgeType))
-
-      return false
-    })
+  private setup() {
+    const { emit } = useEdgeHooks(this.store.emits);
+    this.emit = emit;
 
     const { handlePointerDown } = useHandle({
-      nodeId,
-      handleId,
-      type: edgeUpdaterType,
-      isValidConnection,
-      edgeUpdaterType,
-      onEdgeUpdate,
-      onEdgeUpdateEnd,
-    })
+      nodeId: this.nodeId,
+      handleId: this.handleId,
+      type: this.edgeUpdaterType,
+      isValidConnection: this.store.isValidConnection,
+      edgeUpdaterType: this.edgeUpdaterType,
+      onEdgeUpdate: (event, connection) => this.onEdgeUpdate(event, connection),
+      onEdgeUpdateEnd: (event) => this.onEdgeUpdateEnd(event),
+    });
 
-    return () => {
-      const sourceNode = findNode(edge.value.source)
-      const targetNode = findNode(edge.value.target)
-      const pathOptions = 'pathOptions' in edge.value ? edge.value.pathOptions : {}
+    this.handlePointerDown = handlePointerDown;
+    this.setupEventListeners();
+  }
 
-      if (!sourceNode && !targetNode) {
-        emits.error(new VueFlowError(ErrorCode.EDGE_SOURCE_TARGET_MISSING, edge.value.id, edge.value.source, edge.value.target))
+  private setupEventListeners() {
+    const onClick = (e: MouseEvent) => this.onEdgeClick(e);
+    const onContextMenu = (e: MouseEvent) => this.onEdgeContextMenu(e);
+    const onDblClick = (e: MouseEvent) => this.onDoubleClick(e);
+    const onMouseEnter = (e: MouseEvent) =>
+      this.emit.mouseEnter({ event: e, edge: this.edge });
+    const onMouseMove = (e: MouseEvent) =>
+      this.emit.mouseMove({ event: e, edge: this.edge });
+    const onMouseLeave = (e: MouseEvent) =>
+      this.emit.mouseLeave({ event: e, edge: this.edge });
+    const onKeyDown = (e: KeyboardEvent) => this.onKeyDown(e);
 
-        return null
-      }
+    this.addEventListener('click', onClick);
+    this.addEventListener('contextmenu', onContextMenu);
+    this.addEventListener('dblclick', onDblClick);
+    this.addEventListener('mouseenter', onMouseEnter);
+    this.addEventListener('mousemove', onMouseMove);
+    this.addEventListener('mouseleave', onMouseLeave);
+    this.addEventListener('keydown', onKeyDown);
 
-      if (!sourceNode) {
-        emits.error(new VueFlowError(ErrorCode.EDGE_SOURCE_MISSING, edge.value.id, edge.value.source))
+    this.cleanups.push(() => {
+      this.removeEventListener('click', onClick);
+      this.removeEventListener('contextmenu', onContextMenu);
+      this.removeEventListener('dblclick', onDblClick);
+      this.removeEventListener('mouseenter', onMouseEnter);
+      this.removeEventListener('mousemove', onMouseMove);
+      this.removeEventListener('mouseleave', onMouseLeave);
+      this.removeEventListener('keydown', onKeyDown);
+    });
+  }
 
-        return null
-      }
+  private getSvgParent(): SVGSVGElement | null {
+    let el: Element | null = this.parentElement;
+    while (el) {
+      if (el instanceof SVGSVGElement) return el;
+      el = el.parentElement;
+    }
+    return null;
+  }
 
-      if (!targetNode) {
-        emits.error(new VueFlowError(ErrorCode.EDGE_TARGET_MISSING, edge.value.id, edge.value.target))
+  /** Compute the current bezier path from live node positions */
+  private computePath(): string | null {
+    const edge = this.edge;
+    if (!edge) return null;
 
-        return null
-      }
+    const { findNode, connectionMode } = this.store;
+    const sourceNode = findNode(edge.source);
+    const targetNode = findNode(edge.target);
+    if (!sourceNode || !targetNode) return null;
 
-      if (!edge.value || edge.value.hidden || sourceNode.hidden || targetNode.hidden) {
-        return null
-      }
+    const sourceNodeHandles =
+      connectionMode === ConnectionMode.Strict
+        ? sourceNode.handleBounds.source
+        : [
+            ...(sourceNode.handleBounds.source || []),
+            ...(sourceNode.handleBounds.target || []),
+          ];
+    const sourceHandle = getEdgeHandle(sourceNodeHandles, edge.sourceHandle);
 
-      let sourceNodeHandles
-      if (connectionMode.value === ConnectionMode.Strict) {
-        sourceNodeHandles = sourceNode.handleBounds.source
-      } else {
-        sourceNodeHandles = [...(sourceNode.handleBounds.source || []), ...(sourceNode.handleBounds.target || [])]
-      }
+    const targetNodeHandles =
+      connectionMode === ConnectionMode.Strict
+        ? targetNode.handleBounds.target
+        : [
+            ...(targetNode.handleBounds.target || []),
+            ...(targetNode.handleBounds.source || []),
+          ];
+    const targetHandle = getEdgeHandle(targetNodeHandles, edge.targetHandle);
 
-      const sourceHandle = getEdgeHandle(sourceNodeHandles, edge.value.sourceHandle)
+    const sourcePosition = sourceHandle?.position || Position.Bottom;
+    const targetPosition = targetHandle?.position || Position.Top;
 
-      let targetNodeHandles
-      if (connectionMode.value === ConnectionMode.Strict) {
-        targetNodeHandles = targetNode.handleBounds.target
-      } else {
-        targetNodeHandles = [...(targetNode.handleBounds.target || []), ...(targetNode.handleBounds.source || [])]
-      }
+    const { x: sourceX, y: sourceY } = getHandlePosition(
+      sourceNode,
+      sourceHandle,
+      sourcePosition,
+    );
+    const { x: targetX, y: targetY } = getHandlePosition(
+      targetNode,
+      targetHandle,
+      targetPosition,
+    );
 
-      const targetHandle = getEdgeHandle(targetNodeHandles, edge.value.targetHandle)
+    edge.sourceX = sourceX;
+    edge.sourceY = sourceY;
+    edge.targetX = targetX;
+    edge.targetY = targetY;
 
-      const sourcePosition = sourceHandle?.position || Position.Bottom
+    const pathParams = {
+      sourceX,
+      sourceY,
+      sourcePosition,
+      targetX,
+      targetY,
+      targetPosition,
+      ...('pathOptions' in edge ? (edge as any).pathOptions : {}),
+    };
 
-      const targetPosition = targetHandle?.position || Position.Top
-
-      const { x: sourceX, y: sourceY } = getHandlePosition(sourceNode, sourceHandle, sourcePosition)
-      const { x: targetX, y: targetY } = getHandlePosition(targetNode, targetHandle, targetPosition)
-
-      // todo: let's avoid writing these here (in v2 we want to remove all of these self-managed refs)
-      edge.value.sourceX = sourceX
-      edge.value.sourceY = sourceY
-      edge.value.targetX = targetX
-      edge.value.targetY = targetY
-
-      return h(
-        'g',
-        {
-          'ref': edgeEl,
-          'key': props.id,
-          'data-id': props.id,
-          'class': [
-            'vue-flow__edge',
-            `vue-flow__edge-${edgeCmp.value === false ? 'default' : edge.value.type || 'default'}`,
-            noPanClassName.value,
-            edgeClass.value,
-            {
-              updating: mouseOver.value,
-              selected: edge.value.selected,
-              animated: edge.value.animated,
-              inactive: !isSelectable.value && !hooks.value.edgeClick.hasListeners(),
-            },
-          ],
-          'tabIndex': isFocusable.value ? 0 : undefined,
-          'aria-label':
-            edge.value.ariaLabel === null
-              ? undefined
-              : edge.value.ariaLabel ?? `Edge from ${edge.value.source} to ${edge.value.target}`,
-          'aria-describedby': isFocusable.value ? `${ARIA_EDGE_DESC_KEY}-${vueFlowId}` : undefined,
-          'aria-roledescription': 'edge',
-          'role': isFocusable.value ? 'group' : 'img',
-          ...edge.value.domAttributes,
-          'onClick': onEdgeClick,
-          'onContextmenu': onEdgeContextMenu,
-          'onDblclick': onDoubleClick,
-          'onMouseenter': onEdgeMouseEnter,
-          'onMousemove': onEdgeMouseMove,
-          'onMouseleave': onEdgeMouseLeave,
-          'onKeyDown': isFocusable.value ? onKeyDown : undefined,
-        },
-        [
-          updating.value
-            ? null
-            : h(edgeCmp.value === false ? getEdgeTypes.value.default : (edgeCmp.value as any), {
-                id: props.id,
-                sourceNode,
-                targetNode,
-                source: edge.value.source,
-                target: edge.value.target,
-                type: edge.value.type,
-                updatable: isUpdatable.value,
-                selected: edge.value.selected,
-                animated: edge.value.animated,
-                label: edge.value.label,
-                labelStyle: edge.value.labelStyle,
-                labelShowBg: edge.value.labelShowBg,
-                labelBgStyle: edge.value.labelBgStyle,
-                labelBgPadding: edge.value.labelBgPadding,
-                labelBgBorderRadius: edge.value.labelBgBorderRadius,
-                data: edge.value.data,
-                events: { ...edge.value.events, ...on },
-                style: edgeStyle.value,
-                markerStart: `url('#${getMarkerId(edge.value.markerStart, vueFlowId)}')`,
-                markerEnd: `url('#${getMarkerId(edge.value.markerEnd, vueFlowId)}')`,
-                sourcePosition,
-                targetPosition,
-                sourceX,
-                sourceY,
-                targetX,
-                targetY,
-                sourceHandleId: edge.value.sourceHandle,
-                targetHandleId: edge.value.targetHandle,
-                interactionWidth: edge.value.interactionWidth,
-                ...pathOptions,
-              }),
-          [
-            isUpdatable.value === 'source' || isUpdatable.value === true
-              ? [
-                  h(
-                    'g',
-                    {
-                      onMousedown: onEdgeUpdaterSourceMouseDown,
-                      onMouseenter: onEdgeUpdaterMouseEnter,
-                      onMouseout: onEdgeUpdaterMouseOut,
-                    },
-                    h(EdgeAnchor, {
-                      'position': sourcePosition,
-                      'centerX': sourceX,
-                      'centerY': sourceY,
-                      'radius': edgeUpdaterRadius.value,
-                      'type': 'source',
-                      'data-type': 'source',
-                    }),
-                  ),
-                ]
-              : null,
-            isUpdatable.value === 'target' || isUpdatable.value === true
-              ? [
-                  h(
-                    'g',
-                    {
-                      onMousedown: onEdgeUpdaterTargetMouseDown,
-                      onMouseenter: onEdgeUpdaterMouseEnter,
-                      onMouseout: onEdgeUpdaterMouseOut,
-                    },
-                    h(EdgeAnchor, {
-                      'position': targetPosition,
-                      'centerX': targetX,
-                      'centerY': targetY,
-                      'radius': edgeUpdaterRadius.value,
-                      'type': 'target',
-                      'data-type': 'target',
-                    }),
-                  ),
-                ]
-              : null,
-          ],
-        ],
-      )
+    const edgeType = edge.type || 'default';
+    let pathD: string;
+    if (edgeType === 'smoothstep') {
+      [pathD] = getSmoothStepPath(pathParams);
+    } else if (edgeType === 'step') {
+      [pathD] = getSmoothStepPath({ ...pathParams, borderRadius: 0 });
+    } else if (edgeType === 'simplebezier') {
+      [pathD] = getSimpleBezierPath(pathParams);
+    } else if (edgeType === 'straight') {
+      [pathD] = getStraightPath(pathParams);
+    } else {
+      [pathD] = getBezierPath(pathParams);
     }
 
-    function onEdgeUpdaterMouseEnter() {
-      mouseOver.value = true
+    return pathD;
+  }
+
+  /** Update just the path `d` attribute — no DOM rebuild, smooth during drag */
+  private updatePath() {
+    const pathD = this.computePath();
+    if (!pathD) return;
+    this.pathEl?.setAttribute('d', pathD);
+    this.interactionEl?.setAttribute('d', pathD);
+    // Reposition label to stay at the midpoint of the updated path
+    if (this.labelFo && this.pathEl) {
+      const pathLength = this.pathEl.getTotalLength?.() ?? 0;
+      const mid = this.pathEl.getPointAtLength?.(pathLength / 2) ?? {
+        x: 0,
+        y: 0,
+      };
+      this.labelFo.setAttribute('x', String(mid.x));
+      this.labelFo.setAttribute('y', String(mid.y));
+    }
+  }
+
+  render() {
+    this.g?.remove();
+    this.g = null;
+    this.pathEl = null;
+    this.interactionEl = null;
+    this.labelFo = null;
+
+    const edge = this.edge;
+    if (!edge) return;
+
+    const {
+      id: flowId,
+      findNode,
+      noPanClassName,
+      emits,
+      hooks,
+    } = this.store;
+
+    const sourceNode = findNode(edge.source);
+    const targetNode = findNode(edge.target);
+
+    if (!sourceNode || !targetNode) {
+      emits.error(
+        new FlowJsError(
+          !sourceNode && !targetNode
+            ? ErrorCode.EDGE_SOURCE_TARGET_MISSING
+            : !sourceNode
+              ? ErrorCode.EDGE_SOURCE_MISSING
+              : ErrorCode.EDGE_TARGET_MISSING,
+          edge.id,
+          edge.source,
+          edge.target,
+        ),
+      );
+      return;
     }
 
-    function onEdgeUpdaterMouseOut() {
-      mouseOver.value = false
+    if (edge.hidden || sourceNode.hidden || targetNode.hidden) return;
+
+    const svg = this.getSvgParent();
+    if (!svg) return;
+
+    const edgeClass =
+      edge.class instanceof Function ? edge.class(edge) : edge.class;
+    const edgeStyle =
+      edge.style instanceof Function ? edge.style(edge) : edge.style;
+    const edgeType = edge.type || 'default';
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+    g.dataset.id = this.edgeId;
+    g.setAttribute('aria-roledescription', 'edge');
+    g.setAttribute('role', this.isFocusable ? 'group' : 'img');
+
+    if (this.isFocusable) {
+      g.tabIndex = 0;
+      g.setAttribute('aria-describedby', `${ARIA_EDGE_DESC_KEY}-${flowId}`);
     }
 
-    function onEdgeUpdate(event: MouseTouchEvent, connection: Connection) {
-      emit.update({ event, edge: edge.value, connection })
+    if (edge.ariaLabel !== null) {
+      g.setAttribute(
+        'aria-label',
+        edge.ariaLabel ?? `Edge from ${edge.source} to ${edge.target}`,
+      );
     }
 
-    function onEdgeUpdateEnd(event: MouseTouchEvent) {
-      emit.updateEnd({ event, edge: edge.value })
-      updating.value = false
-    }
+    const inactive = !this.isSelectable && !hooks.edgeClick.hasListeners();
+    g.setAttribute(
+      'class',
+      [
+        'flow__edge',
+        `flow__edge-${edgeType}`,
+        noPanClassName,
+        typeof edgeClass === 'string' ? edgeClass : '',
+        edge.selected ? 'selected' : '',
+        edge.animated ? 'animated' : '',
+        inactive ? 'inactive' : '',
+      ]
+        .filter(Boolean)
+        .join(' '),
+    );
 
-    function handleEdgeUpdater(event: MouseEvent, isSourceHandle: boolean) {
-      if (event.button !== 0) {
-        return
+    if (edge.domAttributes) {
+      for (const [key, value] of Object.entries(edge.domAttributes)) {
+        g.setAttribute(key, String(value));
       }
-
-      updating.value = true
-
-      nodeId.value = isSourceHandle ? edge.value.target : edge.value.source
-      handleId.value = (isSourceHandle ? edge.value.targetHandle : edge.value.sourceHandle) ?? null
-
-      edgeUpdaterType.value = isSourceHandle ? 'target' : 'source'
-
-      emit.updateStart({ event, edge: edge.value })
-
-      handlePointerDown(event)
     }
 
-    function onEdgeClick(event: MouseEvent) {
-      const data = { event, edge: edge.value }
+    const pathD = this.computePath() ?? '';
+    const markerStart = `url(#${getMarkerId(edge.markerStart, flowId)})`;
+    const markerEnd = `url(#${getMarkerId(edge.markerEnd, flowId)})`;
 
-      if (isSelectable.value) {
-        nodesSelectionActive.value = false
+    const pathEl = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'path',
+    );
+    pathEl.setAttribute('id', this.edgeId);
+    pathEl.setAttribute('d', pathD);
+    if (edge.markerEnd) pathEl.setAttribute('marker-end', markerEnd);
+    if (edge.markerStart) pathEl.setAttribute('marker-start', markerStart);
+    pathEl.classList.add('flow__edge-path');
+    // Apply stroke style directly on the path so color/width take effect
+    if (edgeStyle) {
+      for (const [key, value] of Object.entries(edgeStyle)) {
+        (pathEl.style as any)[key] = value;
+      }
+    }
+    g.appendChild(pathEl);
+    this.pathEl = pathEl;
 
-        if (edge.value.selected && multiSelectionActive.value) {
-          removeSelectedEdges([edge.value])
+    const interactionEl = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'path',
+    );
+    interactionEl.setAttribute('fill', 'none');
+    interactionEl.setAttribute('d', pathD);
+    interactionEl.setAttribute(
+      'stroke-width',
+      String(edge.interactionWidth ?? 20),
+    );
+    interactionEl.setAttribute('stroke-opacity', '0');
+    interactionEl.classList.add('flow__edge-interaction');
+    g.appendChild(interactionEl);
+    this.interactionEl = interactionEl;
 
-          edgeEl.value?.blur()
-        } else {
-          addSelectedEdges([edge.value])
+    // Label — rendered as a foreignObject so HTML/text can be used
+    if (edge.label) {
+      const labelText = typeof edge.label === 'string' ? edge.label : '';
+      if (labelText) {
+        // Compute midpoint of path for label placement
+        const pathLength = pathEl.getTotalLength?.() ?? 0;
+        const mid = pathEl.getPointAtLength?.(pathLength / 2) ?? { x: 0, y: 0 };
+
+        const fo = document.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'foreignObject',
+        );
+        fo.setAttribute('width', '1');
+        fo.setAttribute('height', '1');
+        fo.setAttribute('x', String(mid.x));
+        fo.setAttribute('y', String(mid.y));
+        fo.style.overflow = 'visible';
+        this.labelFo = fo;
+
+        const labelEl = document.createElement('div');
+        labelEl.textContent = labelText;
+        labelEl.style.cssText = [
+          'position: absolute',
+          'transform: translate(-50%, -50%)',
+          'background: white',
+          'padding: 2px 6px',
+          'border-radius: 4px',
+          'font-size: 12px',
+          'border: 1px solid #e2e8f0',
+          'white-space: nowrap',
+          'pointer-events: all',
+          'user-select: none',
+        ].join(';');
+
+        // Apply custom label style if provided
+        if (edge.labelStyle) {
+          for (const [key, value] of Object.entries(edge.labelStyle)) {
+            (labelEl.style as any)[key] = value;
+          }
         }
-      }
 
-      emit.click(data)
-    }
-
-    function onEdgeContextMenu(event: MouseEvent) {
-      emit.contextMenu({ event, edge: edge.value })
-    }
-
-    function onDoubleClick(event: MouseEvent) {
-      emit.doubleClick({ event, edge: edge.value })
-    }
-
-    function onEdgeMouseEnter(event: MouseEvent) {
-      emit.mouseEnter({ event, edge: edge.value })
-    }
-
-    function onEdgeMouseMove(event: MouseEvent) {
-      emit.mouseMove({ event, edge: edge.value })
-    }
-
-    function onEdgeMouseLeave(event: MouseEvent) {
-      emit.mouseLeave({ event, edge: edge.value })
-    }
-
-    function onEdgeUpdaterSourceMouseDown(event: MouseEvent) {
-      handleEdgeUpdater(event, true)
-    }
-
-    function onEdgeUpdaterTargetMouseDown(event: MouseEvent) {
-      handleEdgeUpdater(event, false)
-    }
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (!disableKeyboardA11y.value && elementSelectionKeys.includes(event.key) && isSelectable.value) {
-        const unselect = event.key === 'Escape'
-
-        if (unselect) {
-          edgeEl.value?.blur()
-
-          removeSelectedEdges([findEdge(props.id)!])
-        } else {
-          addSelectedEdges([findEdge(props.id)!])
-        }
+        fo.appendChild(labelEl);
+        g.appendChild(fo);
       }
     }
-  },
-})
 
-export default EdgeWrapper
+    svg.appendChild(g);
+    this.g = g;
+
+    g.addEventListener('click', (e) =>
+      this.dispatchEvent(new MouseEvent('click', e)),
+    );
+    g.addEventListener('mouseenter', (e) =>
+      this.dispatchEvent(new MouseEvent('mouseenter', e)),
+    );
+    g.addEventListener('mouseleave', (e) =>
+      this.dispatchEvent(new MouseEvent('mouseleave', e)),
+    );
+    g.addEventListener('contextmenu', (e) =>
+      this.dispatchEvent(new MouseEvent('contextmenu', e)),
+    );
+    g.addEventListener('dblclick', (e) =>
+      this.dispatchEvent(new MouseEvent('dblclick', e)),
+    );
+  }
+
+  private onEdgeUpdate(event: MouseTouchEvent, connection: Connection) {
+    this.emit.update({ event, edge: this.edge, connection });
+  }
+
+  private onEdgeUpdateEnd(event: MouseTouchEvent) {
+    this.emit.updateEnd({ event, edge: this.edge });
+    // this.updating = false;
+  }
+
+  // private handleEdgeUpdater(event: MouseEvent, isSourceHandle: boolean) {
+  //   if (event.button !== 0) return;
+  //   // this.updating = true;
+  //   this.nodeId = isSourceHandle ? this.edge.target : this.edge.source;
+  //   this.handleId =
+  //     (isSourceHandle ? this.edge.targetHandle : this.edge.sourceHandle) ??
+  //     null;
+  //   this.edgeUpdaterType = isSourceHandle ? 'target' : 'source';
+  //   this.emit.updateStart({ event, edge: this.edge });
+  //   this.handlePointerDown(event);
+  // }
+
+  private onEdgeClick(event: MouseEvent) {
+    const { addSelectedEdges, removeSelectedEdges, multiSelectionActive } =
+      this.store;
+    if (this.isSelectable) {
+      this.store.nodesSelectionActive = false;
+      if (this.edge.selected && multiSelectionActive) {
+        removeSelectedEdges([this.edge]);
+        this.blur();
+      } else {
+        addSelectedEdges([this.edge]);
+      }
+    }
+    this.emit.click({ event, edge: this.edge });
+  }
+
+  private onEdgeContextMenu(event: MouseEvent) {
+    this.emit.contextMenu({ event, edge: this.edge });
+  }
+
+  private onDoubleClick(event: MouseEvent) {
+    this.emit.doubleClick({ event, edge: this.edge });
+  }
+
+  private onKeyDown(event: KeyboardEvent) {
+    const { disableKeyboardA11y, addSelectedEdges, removeSelectedEdges } =
+      this.store;
+    if (
+      disableKeyboardA11y ||
+      !elementSelectionKeys.includes(event.key) ||
+      !this.isSelectable
+    )
+      return;
+    const unselect = event.key === 'Escape';
+    if (unselect) {
+      this.blur();
+      removeSelectedEdges([this.store.findEdge(this.edgeId)!]);
+    } else {
+      addSelectedEdges([this.store.findEdge(this.edgeId)!]);
+    }
+  }
+}
+
+customElements.define('flow-edge-wrapper', EdgeWrapperElement);

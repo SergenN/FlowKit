@@ -1,6 +1,7 @@
 import type { Selection } from 'd3-selection'
 
 // eslint-disable-next-line unused-imports/no-unused-imports,@typescript-eslint/no-unused-vars -- this is needed for the Selection type to include the transition function :/
+// @ts-ignore
 import type { Transition } from 'd3-transition'
 import type { ZoomBehavior } from 'd3-zoom'
 
@@ -87,11 +88,7 @@ export interface ViewportFunctions {
   zoomOut: ZoomInOut
   zoomTo: ZoomTo
   setViewport: SetViewport
-  /** @deprecated use setViewport instead */
-  setTransform: SetViewport
   getViewport: GetViewport
-  /** @deprecated use getViewport instead */
-  getTransform: GetViewport
   fitView: FitView
   setCenter: SetCenter
   fitBounds: FitBounds

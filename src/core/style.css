@@ -1,242 +1,242 @@
-.vue-flow {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 0;
-  direction: ltr;
+.flow {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    direction: ltr;
 }
 
-.vue-flow__container {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  left: 0;
-  top: 0;
+.flow__container {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    top: 0;
 }
 
-.vue-flow__pane {
-  z-index: 1;
+.flow__pane {
+    z-index: 1;
 
-  &.draggable {
-    cursor: grab;
-  }
+    &.draggable {
+        cursor: grab;
+    }
 
-  &.selection {
-    cursor: pointer;
-  }
-
-  &.dragging {
-    cursor: grabbing;
-  }
-}
-
-.vue-flow__transformationpane {
-  transform-origin: 0 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.vue-flow__viewport {
-  z-index: 4;
-  overflow: clip;
-}
-
-.vue-flow__selection {
-  z-index: 6;
-}
-
-.vue-flow__edge-labels {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  user-select: none;
-}
-
-.vue-flow__nodesselection-rect:focus,
-.vue-flow__nodesselection-rect:focus-visible {
-  outline: none;
-}
-
-.vue-flow .vue-flow__edges {
-  pointer-events: none;
-  overflow: visible;
-}
-
-.vue-flow__edge-path,
-.vue-flow__connection-path {
-  stroke: #b1b1b7;
-  stroke-width: 1;
-  fill: none;
-}
-
-.vue-flow__edge {
-  pointer-events: visibleStroke;
-  cursor: pointer;
-
-  &.animated path {
-    stroke-dasharray: 5;
-    animation: dashdraw 0.5s linear infinite;
-  }
-
-  &.animated path.vue-flow__edge-interaction {
-    stroke-dasharray: none;
-    animation: none;
-  }
-
-  &.inactive {
-    pointer-events: none;
-  }
-
-  &.selected,
-  &:focus,
-  &:focus-visible {
-    outline: none;
-  }
-
-  &.selected .vue-flow__edge-path,
-  &:focus .vue-flow__edge-path,
-  &:focus-visible .vue-flow__edge-path {
-    stroke: #555;
-  }
-
-  &-textwrapper {
-    pointer-events: all;
-  }
-
-  &-textbg {
-    fill: white;
-  }
-
-  &-text {
-    pointer-events: none;
-    user-select: none;
-  }
-}
-
-.vue-flow__connection {
-  pointer-events: none;
-
-  .animated {
-    stroke-dasharray: 5;
-    animation: dashdraw 0.5s linear infinite;
-  }
-}
-
-.vue-flow__connectionline {
-  z-index: 1001;
-}
-
-.vue-flow__nodes {
-  pointer-events: none;
-  transform-origin: 0 0;
-}
-
-.vue-flow__node {
-  position: absolute;
-  user-select: none;
-  pointer-events: all;
-  transform-origin: 0 0;
-  box-sizing: border-box;
-  cursor: default;
-
-  &.draggable {
-    cursor: grab;
-    pointer-events: all;
+    &.selection {
+        cursor: pointer;
+    }
 
     &.dragging {
-      cursor: grabbing;
+        cursor: grabbing;
     }
-  }
 }
 
-.vue-flow__nodesselection {
-  z-index: 3;
-  transform-origin: left top;
-  pointer-events: none;
+.flow__transformationpane {
+    transform-origin: 0 0;
+    z-index: 2;
+    pointer-events: none;
+}
 
-  &-rect {
+.flow__viewport {
+    z-index: 4;
+    overflow: clip;
+}
+
+.flow__selection {
+    z-index: 6;
+}
+
+.flow__edge-labels {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    user-select: none;
+}
+
+.flow__nodesselection-rect:focus,
+.flow__nodesselection-rect:focus-visible {
+    outline: none;
+}
+
+.flow .flow__edges {
+    pointer-events: none;
+    overflow: visible;
+}
+
+.flow__edge-path,
+.flow__connection-path {
+    stroke: #b1b1b7;
+    stroke-width: 1;
+    fill: none;
+}
+
+.flow__edge {
+    pointer-events: visibleStroke;
+    cursor: pointer;
+
+    &.animated path {
+        stroke-dasharray: 5;
+        animation: dashdraw 0.5s linear infinite;
+    }
+
+    &.animated path.flow__edge-interaction {
+        stroke-dasharray: none;
+        animation: none;
+    }
+
+    &.inactive {
+        pointer-events: none;
+    }
+
+    &.selected,
+    &:focus,
+    &:focus-visible {
+        outline: none;
+    }
+
+    &.selected .flow__edge-path,
+    &:focus .flow__edge-path,
+    &:focus-visible .flow__edge-path {
+        stroke: #555;
+    }
+}
+
+.flow__edge-textwrapper {
+    pointer-events: all;
+}
+
+.flow__edge-textbg {
+    fill: white;
+}
+
+.flow__edge-text {
+    pointer-events: none;
+    user-select: none;
+}
+
+.flow__connection {
+    pointer-events: none;
+
+    .animated {
+        stroke-dasharray: 5;
+        animation: dashdraw 0.5s linear infinite;
+    }
+}
+
+.flow__connectionline {
+    z-index: 1001;
+}
+
+.flow__nodes {
+    pointer-events: none;
+    transform-origin: 0 0;
+}
+
+.flow__node {
+    position: absolute;
+    user-select: none;
+    pointer-events: all;
+    transform-origin: 0 0;
+    box-sizing: border-box;
+    cursor: default;
+
+    &.draggable {
+        cursor: grab;
+        pointer-events: all;
+
+        &.dragging {
+            cursor: grabbing;
+        }
+    }
+}
+
+.flow__nodesselection {
+    z-index: 3;
+    transform-origin: left top;
+    pointer-events: none;
+}
+
+.flow__nodesselection-rect {
     position: absolute;
     pointer-events: all;
     cursor: grab;
 
     &.dragging {
-      cursor: grabbing;
+        cursor: grabbing;
     }
-  }
 }
 
-.vue-flow__handle {
-  position: absolute;
-  pointer-events: none;
-  min-width: 5px;
-  min-height: 5px;
+.flow__handle {
+    position: absolute;
+    pointer-events: none;
+    min-width: 5px;
+    min-height: 5px;
 
-  &.connectable {
-    pointer-events: all;
-    cursor: crosshair;
-  }
+    &.connectable {
+        pointer-events: all;
+        cursor: crosshair;
+    }
+}
 
-  &-bottom {
+.flow__handle-bottom {
     left: 50%;
     bottom: 0;
     transform: translate(-50%, 50%);
-  }
+}
 
-  &-top {
+.flow__handle-top {
     left: 50%;
     top: 0;
     transform: translate(-50%, -50%);
-  }
+}
 
-  &-left {
+.flow__handle-left {
     top: 50%;
     left: 0;
     transform: translate(-50%, -50%);
-  }
+}
 
-  &-right {
+.flow__handle-right {
     top: 50%;
     right: 0;
     transform: translate(50%, -50%);
-  }
 }
 
-.vue-flow__edgeupdater {
-  cursor: move;
-  pointer-events: all;
+.flow__edgeupdater {
+    cursor: move;
+    pointer-events: all;
 }
 
-.vue-flow__panel {
-  position: absolute;
-  z-index: 5;
-  margin: 15px;
+.flow__panel {
+    position: absolute;
+    z-index: 5;
+    margin: 15px;
 
-  &.top {
-    top: 0;
-  }
+    &.top {
+        top: 0;
+    }
 
-  &.bottom {
-    bottom: 0;
-  }
+    &.bottom {
+        bottom: 0;
+    }
 
-  &.left {
-    left: 0;
-  }
+    &.left {
+        left: 0;
+    }
 
-  &.right {
-    right: 0;
-  }
+    &.right {
+        right: 0;
+    }
 
-  &.center {
-    left: 50%;
-    transform: translateX(-50%);
-  }
+    &.center {
+        left: 50%;
+        transform: translateX(-50%);
+    }
 }
 
 @keyframes dashdraw {
-  from {
-    stroke-dashoffset: 10;
-  }
+    from {
+        stroke-dashoffset: 10;
+    }
 }

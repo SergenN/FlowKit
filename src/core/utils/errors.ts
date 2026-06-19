@@ -16,13 +16,12 @@ export enum ErrorCode {
   EDGE_ORPHANED = 'EDGE_ORPHANED',
 
   // deprecation errors
-  USEVUEFLOW_OPTIONS = 'USEVUEFLOW_OPTIONS',
+  USEFLOWJS_OPTIONS = 'USEFLOWJS_OPTIONS',
 }
 
 const messages = {
-  [ErrorCode.MISSING_STYLES]: () =>
-    `It seems that you haven't loaded the necessary styles. Please import '@vue-flow/core/dist/style.css' to ensure that the graph is rendered correctly`,
-  [ErrorCode.MISSING_VIEWPORT_DIMENSIONS]: () => 'The Vue Flow parent container needs a width and a height to render the graph',
+  [ErrorCode.MISSING_STYLES]: () => `It seems that you haven't loaded the necessary styles. Please import '@flowjs/core/dist/style.css' to ensure that the graph is rendered correctly`,
+  [ErrorCode.MISSING_VIEWPORT_DIMENSIONS]: () => 'The FlowJS parent container needs a width and a height to render the graph',
   [ErrorCode.NODE_INVALID]: (id?: string) => `Node is invalid\nNode: ${id}`,
   [ErrorCode.NODE_NOT_FOUND]: (id: string | null) => `Node not found\nNode: ${id}`,
   [ErrorCode.NODE_MISSING_PARENT]: (id: string, parentId: string) => `Node is missing a parent\nNode: ${id}\nParent: ${parentId}`,
@@ -32,16 +31,13 @@ const messages = {
   [ErrorCode.EDGE_SOURCE_MISSING]: (id: string, source: string) => `Edge source is missing\nEdge: ${id} \nSource: ${source}`,
   [ErrorCode.EDGE_TARGET_MISSING]: (id: string, target: string) => `Edge target is missing\nEdge: ${id} \nTarget: ${target}`,
   [ErrorCode.EDGE_TYPE_MISSING]: (type: string) => `Edge type is missing\nType: ${type}`,
-  [ErrorCode.EDGE_SOURCE_TARGET_SAME]: (id: string, source: string, target: string) =>
-    `Edge source and target are the same\nEdge: ${id} \nSource: ${source} \nTarget: ${target}`,
-  [ErrorCode.EDGE_SOURCE_TARGET_MISSING]: (id: string, source: string, target: string) =>
-    `Edge source or target is missing\nEdge: ${id} \nSource: ${source} \nTarget: ${target}`,
-  [ErrorCode.EDGE_ORPHANED]: (id: string) =>
-    `Edge was orphaned (suddenly missing source or target) and has been removed\nEdge: ${id}`,
+  [ErrorCode.EDGE_SOURCE_TARGET_SAME]: (id: string, source: string, target: string) => `Edge source and target are the same\nEdge: ${id} \nSource: ${source} \nTarget: ${target}`,
+  [ErrorCode.EDGE_SOURCE_TARGET_MISSING]: (id: string, source: string, target: string) => `Edge source or target is missing\nEdge: ${id} \nSource: ${source} \nTarget: ${target}`,
+  [ErrorCode.EDGE_ORPHANED]: (id: string) => `Edge was orphaned (suddenly missing source or target) and has been removed\nEdge: ${id}`,
   [ErrorCode.EDGE_NOT_FOUND]: (id: string) => `Edge not found\nEdge: ${id}`,
 
   // deprecation errors
-  [ErrorCode.USEVUEFLOW_OPTIONS]: () =>
+  [ErrorCode.USEFLOWJS_OPTIONS]: () =>
     `The options parameter is deprecated and will be removed in the next major version. Please use the id parameter instead`,
 } as const
 
@@ -49,8 +45,8 @@ type ErrorArgs<T extends ErrorCode> = (typeof messages)[T] extends (...args: any
   ? Parameters<(typeof messages)[T]>
   : never
 
-export class VueFlowError<T extends ErrorCode = ErrorCode, Args extends ErrorArgs<T> = ErrorArgs<T>> extends Error {
-  name = 'VueFlowError'
+export class FlowJsError<T extends ErrorCode = ErrorCode, Args extends ErrorArgs<T> = ErrorArgs<T>> extends Error {
+  name = 'FlowJsError'
   code: T
   args: Args
 
@@ -62,6 +58,6 @@ export class VueFlowError<T extends ErrorCode = ErrorCode, Args extends ErrorArg
   }
 }
 
-export function isErrorOfType<T extends ErrorCode>(error: VueFlowError, code: T): error is VueFlowError<T> {
+export function isErrorOfType<T extends ErrorCode>(error: FlowJsError, code: T): error is FlowJsError<T> {
   return error.code === code
 }

@@ -1,29 +1,28 @@
-import { defineComponent, h } from 'vue'
-import type { StepEdgeProps } from '../../types'
-import SmoothStepEdge from './SmoothStepEdge'
+import type { StepEdgeProps } from '../../types';
 
-const StepEdge = defineComponent<StepEdgeProps>({
-  name: 'StepEdge',
-  props: [
-    'sourcePosition',
-    'targetPosition',
-    'label',
-    'labelStyle',
-    'labelShowBg',
-    'labelBgStyle',
-    'labelBgPadding',
-    'labelBgBorderRadius',
-    'sourceY',
-    'sourceX',
-    'targetX',
-    'targetY',
-    'markerEnd',
-    'markerStart',
-    'interactionWidth',
-  ] as any,
-  setup(props, { attrs }) {
-    return () => h(SmoothStepEdge as any, { ...props, ...attrs, borderRadius: 0 })
-  },
-})
+export class StepEdgeElement extends HTMLElement {
+  private props: Partial<StepEdgeProps> = {};
 
-export default StepEdge
+  connectedCallback() {
+    this.render();
+  }
+
+  setProps(props: StepEdgeProps) {
+    this.props = props;
+    this.render();
+  }
+
+  private render() {
+    this.innerHTML = '';
+
+    const smoothStep = document.createElement('flow-smooth-step-edge') as any;
+    smoothStep.setProps?.({
+      ...this.props,
+      borderRadius: 0,
+    });
+
+    this.appendChild(smoothStep);
+  }
+}
+
+customElements.define('flow-step-edge', StepEdgeElement);

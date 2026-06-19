@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        html, body { margin: 0; height: 100%; }
+        flow-js { display: block; width: 100%; height: 100%; }
+    </style>
     <title>FlowJS</title>
 </head>
 <body>
@@ -10,29 +14,107 @@
         id="my-flow"
         nodes-draggable
         elements-selectable
-        fit-view-on-init
-></flow-js>
-
-<script type="module" src="/main.ts"></script>
+        fit-view-on-init>
+</flow-js>
+<script type="module" src="./src/core/main.ts"></script>
 
 <script type="module">
-    // access the store imperatively after the element is defined
+    import { MarkerType } from './src/core/types/index.ts';
+
     customElements.whenDefined('flow-js').then(() => {
-        const flow = document.querySelector('flow-js')
-        const store = flow.getStore()
+        const store = document.querySelector('#my-flow').getStore()
 
-        store.setNodes([
-            { id: '1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } },
-            { id: '2', position: { x: 200, y: 100 }, data: { label: 'Node 2' } },
+        store.addNodes([
+            {
+                id: '1',
+                position: { x: 0, y: 0 },
+                data: { label: '🚀 Start' },
+                style: {
+                    background: '#6366f1',
+                    color: '#fff',
+                    border: '2px solid #4338ca',
+                    borderRadius: '8px',
+                    padding: '10px 16px',
+                    fontWeight: 'bold',
+                },
+            },
+            {
+                id: '2',
+                position: { x: 300, y: 0 },
+                data: { label: '⚙️ Process' },
+                style: {
+                    background: '#f59e0b',
+                    color: '#fff',
+                    border: '2px solid #d97706',
+                    borderRadius: '8px',
+                    padding: '10px 16px',
+                    fontWeight: 'bold',
+                },
+            },
+            {
+                id: '3',
+                position: { x: 600, y: 0 },
+                data: { label: '✅ Done' },
+                style: {
+                    background: '#10b981',
+                    color: '#fff',
+                    border: '2px solid #059669',
+                    borderRadius: '8px',
+                    padding: '10px 16px',
+                    fontWeight: 'bold',
+                },
+            },
         ])
 
-        store.setEdges([
-            { id: 'e1-2', source: '1', target: '2' },
-        ])
-
-        // listen to events
-        flow.addEventListener('nodeClick', (event) => {
-            console.log('node clicked', event.detail)
+        store.onNodesInitialized(() => {
+            store.addEdges([
+                {
+                    id: 'e1-2',
+                    source: '1',
+                    target: '2',
+                    label: 'step one',
+                    animated: true,
+                    type: 'smoothstep',
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        color: '#6366f1',
+                        width: 20,
+                        height: 20,
+                        strokeWidth: 2,
+                    },
+                    style: { stroke: '#6366f1', strokeWidth: 2 },
+                    labelStyle: {
+                        background: '#6366f1',
+                        color: '#fff',
+                        borderColor: '#4338ca',
+                        fontWeight: 'bold',
+                        fontSize: '11px',
+                    },
+                },
+                {
+                    id: 'e2-3',
+                    source: '2',
+                    target: '3',
+                    label: 'step two',
+                    animated: true,
+                    type: 'smoothstep',
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        color: '#6366f1',
+                        width: 20,
+                        height: 20,
+                        strokeWidth: 2,
+                    },
+                    style: { stroke: '#f59e0b', strokeWidth: 2 },
+                    labelStyle: {
+                        background: '#f59e0b',
+                        color: '#fff',
+                        borderColor: '#d97706',
+                        fontWeight: 'bold',
+                        fontSize: '11px',
+                    },
+                },
+            ])
         })
     })
 </script>

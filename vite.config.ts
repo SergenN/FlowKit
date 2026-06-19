@@ -4,7 +4,7 @@ export default defineConfig({
   build: {
     target: 'esnext',
     lib: {
-      entry: 'src/main.ts',
+      entry: 'src/core/main.ts',
       name: 'FlowJS',
       fileName: 'flow-js',
       formats: ['es', 'umd'],

@@ -1,48 +1,38 @@
-import { defineComponent, h } from 'vue'
-import type { SmoothStepEdgeProps } from '../../types'
-import { Position } from '../../types'
-import BaseEdge from './BaseEdge.vue'
-import { getSmoothStepPath } from './utils'
+import type { SmoothStepEdgeProps } from '../../types';
+import { Position } from '../../types';
+import { getSmoothStepPath } from './utils';
 
-const SmoothStepEdge = defineComponent<SmoothStepEdgeProps>({
-  name: 'SmoothStepEdge',
-  props: [
-    'sourcePosition',
-    'targetPosition',
-    'label',
-    'labelStyle',
-    'labelShowBg',
-    'labelBgStyle',
-    'labelBgPadding',
-    'labelBgBorderRadius',
-    'sourceY',
-    'sourceX',
-    'targetX',
-    'targetY',
-    'borderRadius',
-    'markerEnd',
-    'markerStart',
-    'interactionWidth',
-    'offset',
-  ] as any,
-  compatConfig: { MODE: 3 },
-  setup(props, { attrs }) {
-    return () => {
-      const [path, labelX, labelY] = getSmoothStepPath({
-        ...props,
-        sourcePosition: props.sourcePosition ?? Position.Bottom,
-        targetPosition: props.targetPosition ?? Position.Top,
-      })
+export class SmoothStepEdgeElement extends HTMLElement {
+  private props: Partial<SmoothStepEdgeProps> = {};
 
-      return h(BaseEdge as any, {
-        path,
-        labelX,
-        labelY,
-        ...attrs,
-        ...props,
-      })
-    }
-  },
-})
+  connectedCallback() {
+    this.render();
+  }
 
-export default SmoothStepEdge
+  setProps(props: SmoothStepEdgeProps) {
+    this.props = props;
+    this.render();
+  }
+
+  private render() {
+    this.innerHTML = '';
+
+    const [path, labelX, labelY] = getSmoothStepPath({
+      ...this.props,
+      sourcePosition: this.props.sourcePosition ?? Position.Bottom,
+      targetPosition: this.props.targetPosition ?? Position.Top,
+    } as SmoothStepEdgeProps);
+
+    const baseEdge = document.createElement('flow-base-edge') as any;
+    baseEdge.setProps?.({
+      ...this.props,
+      path,
+      labelX,
+      labelY,
+    });
+
+    this.appendChild(baseEdge);
+  }
+}
+
+customElements.define('flow-smooth-step-edge', SmoothStepEdgeElement);

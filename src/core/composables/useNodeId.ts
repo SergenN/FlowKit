@@ -1,14 +1,8 @@
-import { inject } from 'vue'
-import { NodeId } from '../context'
-
 /**
- * This composable returns the current node id from the ctx.
- *
- * It should be used inside a (custom-)node components ctx as the id is provided by the internal `NodeWrapper` component.
- *
- * @public
- * @returns the current node id
+ * Returns the current node id.
+ * In a web component context, pass the id directly as a parameter or attribute
+ * rather than relying on context injection.
  */
-export function useNodeId() {
-  return inject(NodeId, '')
+export function useNodeId(id: string): string {
+  return id;
 }

@@ -1,9 +1,5 @@
-import type { Component, HTMLAttributes, VNode } from 'vue'
-import type { ClassFunc, Dimensions, ElementData, Position, StyleFunc, Styles, XYPosition, XYZPosition } from './flow'
-import type { NodeComponent } from './components'
-import type { HandleConnectable, HandleElement, ValidConnectionFunc } from './handle'
-import type { CustomEvent, NodeEventsHandler, NodeEventsOn } from './hooks'
-
+import type { Dimensions, ElementData, Position, Styles, XYPosition, XYZPosition } from './flow'
+import type { HandleConnectable, HandleElement } from './handle'
 /** Defined as [[x-from, y-from], [x-to, y-to]] */
 export type CoordinateExtent = [extentFrom: [fromX: number, fromY: number], extentTo: [toX: number, toY: number]]
 
@@ -23,118 +19,75 @@ export interface NodeHandleBounds {
   target: HandleElement[] | null
 }
 
-/** @deprecated will be removed in next major release */
-export type WidthFunc = (node: GraphNode) => number | string | void
-
-/** @deprecated will be removed in next major release */
-export type HeightFunc = (node: GraphNode) => number | string | void
-
-export interface Node<Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any, Type extends string = string> {
+export interface Node<
+  Data = ElementData,
+  Type extends string = string,
+> {
   /** Unique node id */
-  id: string
-  /**
-   * @deprecated - will be removed in next major release and replaced with `{ data: { label: string | VNode | Component } }`
-   * A node label
-   */
-  label?: string | VNode | Component
+  id: string;
   /** initial node position x, y */
-  position: XYPosition
+  position: XYPosition;
   /** node type, can be a default type or a custom type */
-  type?: Type
+  type?: Type;
   /** handle position */
-  targetPosition?: Position
+  targetPosition?: Position;
   /** handle position */
-  sourcePosition?: Position
+  sourcePosition?: Position;
   /** Disable/enable dragging node */
-  draggable?: boolean
+  draggable?: boolean;
   /** Disable/enable selecting node */
-  selectable?: boolean
+  selectable?: boolean;
   /** Disable/enable connecting node */
-  connectable?: HandleConnectable
+  connectable?: HandleConnectable;
   /** Disable/enable focusing node (a11y) */
-  focusable?: boolean
+  focusable?: boolean;
   /** Disable/enable deleting node */
-  deletable?: boolean
+  deletable?: boolean;
   /** element selector as drag handle for node (can only be dragged from the dragHandle el) */
-  dragHandle?: string
-  /**
-   * @deprecated will be removed in next major release
-   *  called when used as target for new connection
-   */
-  isValidTargetPos?: ValidConnectionFunc
-  /**
-   * @deprecated will be removed in next major release
-   * called when used as source for new connection
-   */
-  isValidSourcePos?: ValidConnectionFunc
+  dragHandle?: string;
   /** define node extent, i.e. area in which node can be moved */
-  extent?: CoordinateExtent | CoordinateExtentRange | 'parent'
+  extent?: CoordinateExtent | CoordinateExtentRange | 'parent';
   /** expands parent area to fit child node */
-  expandParent?: boolean
-  /**
-   * todo: rename to `parentId` in next major release
-   * define node as a child node by setting a parent node id
-   */
-  parentNode?: string
+  expandParent?: boolean;
+  /** define node as a child node by setting a parent node id */
+  parentId?: string;
   /**
    * Fixed width of node, applied as style
    * You can pass a number which will be used in pixel values (width: 300 -> width: 300px)
    * or pass a string with units (width: `10rem` -> width: 10rem)
    */
-  width?: number | string | WidthFunc
+  width?: number | string;
   /**
    * Fixed height of node, applied as style
    * You can pass a number which will be used in pixel values (height: 300 -> height: 300px)
    * or pass a string with units (height: `10rem` -> height: 10rem)
    */
-  height?: number | string | HeightFunc
+  height?: number | string;
 
   /** Additional class names, can be a string or a callback returning a string (receives current flow element) */
-  class?: string | string[] | Record<string, any> | ClassFunc<GraphNode<Data, CustomEvents>>
+  class?:
+    | string
+    | string[]
+    | Record<string, any>;
   /** Additional styles, can be an object or a callback returning an object (receives current flow element) */
-  style?: Styles | StyleFunc<GraphNode<Data, CustomEvents>>
+  style?: Styles;
   /** Is node hidden */
-  hidden?: boolean
-  /**
-   * @deprecated - will be removed in the next major release
-   * overwrites current node type
-   */
-  template?: NodeComponent
+  hidden?: boolean;
   /** Additional data that is passed to your custom components */
-  data?: Data
-  /**
-   * @deprecated - will be removed in the next major release
-   * contextual and custom events that are passed to your custom components
-   */
-  events?: Partial<NodeEventsHandler<CustomEvents>>
-  zIndex?: number
-  ariaLabel?: string
+  data?: Data;
+  zIndex?: number;
+  ariaLabel?: string;
 
   /**
-   * General escape hatch for adding custom attributes to the node's DOM element.
+   * General escape hatch for adding custom attributes to the node's DOM element. TODO check if this is still compatible
    */
-  domAttributes?: Omit<
-    HTMLAttributes,
-    | 'id'
-    | 'style'
-    | 'className'
-    | 'draggable'
-    | 'aria-label'
-    | 'onMouseenter'
-    | 'onMousemove'
-    | 'onMouseleave'
-    | 'onContextmenu'
-    | 'onClick'
-    | 'onDblclick'
-    | 'onKeydown'
-  >
+  domAttributes?: Record<string, string | number | boolean | undefined>;
 }
 
 export interface GraphNode<
   Data = ElementData,
-  CustomEvents extends Record<string, CustomEvent> = any,
   Type extends string = string,
-> extends Node<Data, CustomEvents, Type> {
+> extends Node<Data, Type> {
   /** absolute position in relation to parent elements + z-index */
   computedPosition: XYZPosition
   handleBounds: NodeHandleBounds
@@ -145,75 +98,40 @@ export interface GraphNode<
   resizing: boolean
   dragging: boolean
   data: Data
-  /** @deprecated will be removed in the next major version */
-  events: Partial<NodeEventsHandler<CustomEvents>>
   type: Type
 }
 
 /** these props are passed to node components */
-export interface NodeProps<Data = ElementData, CustomEvents = object, Type extends string = string> {
+export interface NodeProps<
+  Data = ElementData,
+  Type extends string = string,
+> {
   /** unique node id */
-  id: string
+  id: string;
   /** node type */
-  type: Type
+  type: Type;
   /** is node selected */
-  selected: boolean
+  selected: boolean;
   /** can node handles be connected, you need to forward this to your handles for this prop to have any effect */
-  connectable: HandleConnectable
-  /**
-   * @deprecated - will be removed in next major release and replaced with `computedPosition`
-   * node x, y (relative) position on graph
-   */
-  position: XYPosition
+  connectable: HandleConnectable;
   /** dom element dimensions (width, height) */
-  dimensions: Dimensions
-  /**
-   * @deprecated - will be removed in next major release and replaced with `{ data: { label: string | VNode | Component } }`
-   * node label, either pass a string or a VNode
-   * For example like this: `h('div', props, children)`)
-   * Object is just a type-hack for Vue, ignore that
-   */
-  label?: string | VNode | Component | object
-  /**
-   * @deprecated will be removed in next major release
-   * called when used as target for new connection
-   */
-  isValidTargetPos?: ValidConnectionFunc
-  /**
-   * @deprecated will be removed in next major release
-   * called when used as source for new connection
-   */
-  isValidSourcePos?: ValidConnectionFunc
-  /**
-   * @deprecated - will be removed in next major release. Use `parentNodeId` instead
-   * parent node id
-   */
-  parent?: string
-  /**
-   * todo: rename to `parentId` in next major release
-   * parent node id
-   */
-  parentNodeId?: string
+  dimensions: Dimensions;
+  /** parent node id */
+  parentId?: string;
   /** is node currently dragging */
-  dragging: boolean
+  dragging: boolean;
   /** is node currently resizing */
-  resizing: boolean
+  resizing: boolean;
   /** node z-index */
-  zIndex: number
+  zIndex: number;
   /** handle position */
-  targetPosition?: Position
+  targetPosition?: Position;
   /** handle position */
-  sourcePosition?: Position
+  sourcePosition?: Position;
   /** drag handle query selector */
-  dragHandle?: string
-
+  dragHandle?: string;
   /** additional data of node */
-  data: Data
-  /**
-   * @deprecated - will be removed in next major release
-   * contextual and custom events of node
-   */
-  events: NodeEventsOn<CustomEvents>
+  data: Data;
 }
 
 /**
@@ -221,6 +139,5 @@ export interface NodeProps<Data = ElementData, CustomEvents = object, Type exten
  */
 export type ToGraphNode<T extends Node> = GraphNode<
   T extends Node<infer Data> ? Data : never,
-  T extends Node<any, infer Events> ? Events : never,
-  T extends Node<any, any, infer Type> ? Type : never
+  T extends Node<any, infer Type> ? Type : never
 >

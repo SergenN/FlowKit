@@ -1,8 +1,11 @@
-import type { CSSProperties, Component, SVGAttributes, VNode } from 'vue'
-import type { ClassFunc, ElementData, Position, StyleFunc, Styles } from './flow'
-import type { GraphNode } from './node'
-import type { EdgeComponent, EdgeTextProps } from './components'
-import type { CustomEvent, EdgeEventsHandler, EdgeEventsOn } from './hooks'
+import type {
+  ElementData,
+  Position,
+  Styles,
+} from './flow';
+import type { GraphNode } from './node';
+import type { EdgeComponent, EdgeTextProps } from './components';
+import type { EdgeEventsOn } from './hooks';
 
 /** Edge markers */
 export enum MarkerType {
@@ -13,236 +16,223 @@ export enum MarkerType {
 /** Edge marker definition */
 export interface EdgeMarker {
   /** Unique marker id */
-  id?: string
+  id?: string;
   /** Marker type */
-  type: MarkerType
+  type: MarkerType;
   /** Marker color */
-  color?: string
+  color?: string;
   /** Marker width */
-  width?: number
+  width?: number;
   /** Marker height */
-  height?: number
+  height?: number;
   /** Marker units */
-  markerUnits?: string
+  markerUnits?: string;
   /** Marker orientation */
-  orient?: string
+  orient?: string;
   /** Marker stroke width */
-  strokeWidth?: number
+  strokeWidth?: number;
 }
 
 export interface MarkerProps {
-  id: string
-  type: MarkerType | string
-  color?: string
-  width?: number
-  height?: number
-  markerUnits?: string
-  orient?: string
-  strokeWidth?: number
+  id: string;
+  type: MarkerType | string;
+  color?: string;
+  width?: number;
+  height?: number;
+  markerUnits?: string;
+  orient?: string;
+  strokeWidth?: number;
 }
 
-export type EdgeMarkerType = string | MarkerType | EdgeMarker
+export type EdgeMarkerType = string | MarkerType | EdgeMarker;
 
-export type EdgeUpdatable = boolean | 'target' | 'source'
+export type EdgeUpdatable = boolean | 'target' | 'source';
 
 export interface EdgeLabelOptions {
   /** Label styles (CSSProperties) */
-  labelStyle?: CSSProperties
+  labelStyle?: Record<string, string | number | undefined>;
   /** Show label bg */
-  labelShowBg?: boolean
+  labelShowBg?: boolean;
   /** Label Bg styles (CSSProperties) */
-  labelBgStyle?: CSSProperties
+  labelBgStyle?: Record<string, string | number | undefined>;
   /** Label Bg padding */
-  labelBgPadding?: [number, number]
+  labelBgPadding?: [number, number];
   /** Label Bg border radius */
-  labelBgBorderRadius?: number
+  labelBgBorderRadius?: number;
 }
 
 export interface DefaultEdge<
   Data = ElementData,
-  CustomEvents extends Record<string, CustomEvent> = any,
   Type extends string = string,
 > extends EdgeLabelOptions {
   /** Unique edge id */
-  id: string
+  id: string;
   /** An edge label */
-  label?: string | VNode | Component<EdgeTextProps>
+  label?: | string | ((props: EdgeTextProps) => HTMLElement | SVGElement | DocumentFragment);
   /** Edge type, can be a default type or a custom type */
-  type?: Type
+  type?: Type;
   /** Source node id */
-  source: string
+  source: string;
   /** Target node id */
-  target: string
+  target: string;
   /** Source handle id */
-  sourceHandle?: string | null
+  sourceHandle?: string | null;
   /** Target handle id */
-  targetHandle?: string | null
+  targetHandle?: string | null;
   /** Animated edge */
-  animated?: boolean
+  animated?: boolean;
   /** EdgeMarker */
-  markerStart?: EdgeMarkerType
+  markerStart?: EdgeMarkerType;
   /** EdgeMarker */
-  markerEnd?: EdgeMarkerType
+  markerEnd?: EdgeMarkerType;
   /** Disable/enable updating edge */
-  updatable?: EdgeUpdatable
+  updatable?: EdgeUpdatable;
   /** Disable/enable selecting edge */
-  selectable?: boolean
+  selectable?: boolean;
   /** Disable/enable focusing edge (a11y) */
-  focusable?: boolean
+  focusable?: boolean;
   /** Disable/enable deleting edge */
-  deletable?: boolean
+  deletable?: boolean;
   /** Additional class names, can be a string or a callback returning a string (receives current flow element) */
-  class?: string | string[] | Record<string, any> | ClassFunc<GraphEdge<Data, CustomEvents>>
+  class?: string | string[] | Record<string, any>;
   /** Additional styles, can be an object or a callback returning an object (receives current flow element) */
-  style?: Styles | StyleFunc<GraphEdge<Data, CustomEvents>>
+  style?: Styles;
   /** Is edge hidden */
-  hidden?: boolean
+  hidden?: boolean;
   /** Radius of mouse event triggers (to ease selecting edges), defaults to 2 */
-  interactionWidth?: number
+  interactionWidth?: number;
   /** Overwrites current edge type */
-  template?: EdgeComponent
+  template?: EdgeComponent;
   /** Additional data that is passed to your custom components */
-  data?: Data
-  /** @deprecated will be removed in the next major version */
-  events?: Partial<EdgeEventsHandler<CustomEvents>>
+  data?: Data;
   /** Aria label for edge (a11y) */
-  zIndex?: number
-  ariaLabel?: string | null
+  zIndex?: number;
+  ariaLabel?: string | null;
   /**
    * General escape hatch for adding custom attributes to the edge's DOM element.
    */
-  domAttributes?: Omit<
-    SVGAttributes,
-    | 'id'
-    | 'style'
-    | 'className'
-    | 'role'
-    | 'aria-label'
-    | 'onClick'
-    | 'onMouseenter'
-    | 'onMousemove'
-    | 'onMouseleave'
-    | 'onContextmenu'
-    | 'onDblclick'
-    | 'onKeyDown'
-  >
+  domAttributes?: Record<string, string | boolean | number>
 }
 
 export interface SmoothStepPathOptions {
-  offset?: number
-  borderRadius?: number
+  offset?: number;
+  borderRadius?: number;
 }
 
-export type SmoothStepEdgeType<Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any> = DefaultEdge<
-  Data,
-  CustomEvents
-> & {
-  type: 'smoothstep'
-  pathOptions?: SmoothStepPathOptions
-}
+export type SmoothStepEdgeType<
+  Data = ElementData,
+> = DefaultEdge<Data> & {
+  type: 'smoothstep';
+  pathOptions?: SmoothStepPathOptions;
+};
 
 export interface BezierPathOptions {
-  curvature?: number
+  curvature?: number;
 }
 
-export type BezierEdgeType<Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any> = DefaultEdge<
-  Data,
-  CustomEvents
-> & {
-  type: 'default'
-  pathOptions?: BezierPathOptions
-}
+export type BezierEdgeType<
+  Data = ElementData,
+> = DefaultEdge<Data> & {
+  type: 'default';
+  pathOptions?: BezierPathOptions;
+};
 
-export type Edge<Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any, Type extends string = string> =
-  | DefaultEdge<Data, CustomEvents, Type>
-  | SmoothStepEdgeType<Data, CustomEvents>
-  | BezierEdgeType<Data, CustomEvents>
+export type Edge<
+  Data = ElementData,
+  Type extends string = string,
+> =
+  | DefaultEdge<Data, Type>
+  | SmoothStepEdgeType<Data>
+  | BezierEdgeType<Data>;
 
-export type DefaultEdgeOptions = Omit<Edge, 'id' | 'source' | 'target' | 'sourceHandle' | 'targetHandle'>
+export type DefaultEdgeOptions = Omit<
+  Edge,
+  'id' | 'source' | 'target' | 'sourceHandle' | 'targetHandle'
+>;
 
 export interface EdgePositions {
-  sourceX: number
-  sourceY: number
-  targetX: number
-  targetY: number
+  sourceX: number;
+  sourceY: number;
+  targetX: number;
+  targetY: number;
 }
 
 /** Internal edge type */
 export type GraphEdge<
   Data = ElementData,
-  CustomEvents extends Record<string, CustomEvent> = any,
   Type extends string = string,
-> = Edge<Data, CustomEvents> & {
-  selected: boolean
-  sourceNode: GraphNode
-  targetNode: GraphNode
-  data: Data
-  /** @deprecated will be removed in the next major version */
-  events: Partial<EdgeEventsHandler<CustomEvents>>
-  type: Type
-} & EdgePositions
+> = Edge<Data> & {
+  selected: boolean;
+  sourceNode: GraphNode;
+  targetNode: GraphNode;
+  data: Data;
+  type: Type;
+} & EdgePositions;
 
 /** these props are passed to edge components */
-export interface EdgeProps<Data = ElementData, CustomEvents = object, Type extends string = string>
-  extends EdgeLabelOptions,
-    EdgePositions {
-  id: string
-  sourceNode: GraphNode
-  targetNode: GraphNode
-  source: string
-  target: string
-  type: Type
-  label?: string | VNode | Component<EdgeTextProps> | object
-  style?: CSSProperties
-  selected?: boolean
-  sourcePosition: Position
-  targetPosition: Position
-  sourceHandleId?: string
-  targetHandleId?: string
-  animated?: boolean
-  updatable?: boolean
-  markerStart: string
-  markerEnd: string
-  curvature?: number
-  interactionWidth?: number
-  data: Data
+export interface EdgeProps<
+  Data = ElementData,
+  CustomEvents = object,
+  Type extends string = string,
+>
+  extends EdgeLabelOptions, EdgePositions {
+  id: string;
+  sourceNode: GraphNode;
+  targetNode: GraphNode;
+  source: string;
+  target: string;
+  type: Type;
+  label?: | string | ((props: EdgeTextProps) => HTMLElement | SVGElement | DocumentFragment);
+  style?: Record<string, string | number | undefined>;
+  selected?: boolean;
+  sourcePosition: Position;
+  targetPosition: Position;
+  sourceHandleId?: string;
+  targetHandleId?: string;
+  animated?: boolean;
+  updatable?: boolean;
+  markerStart: string;
+  markerEnd: string;
+  curvature?: number;
+  interactionWidth?: number;
+  data: Data;
   /** contextual and custom events of edge */
-  events: EdgeEventsOn<CustomEvents>
+  events: EdgeEventsOn<CustomEvents>;
 }
 
 export interface BaseEdgeProps extends EdgeLabelOptions {
-  id?: string
-  labelX?: number
-  labelY?: number
-  path: string
-  label?: any
-  markerStart?: string
-  markerEnd?: string
-  interactionWidth?: number
+  id?: string;
+  labelX?: number;
+  labelY?: number;
+  path: string;
+  label?: any;
+  markerStart?: string;
+  markerEnd?: string;
+  interactionWidth?: number;
 }
 
 export type BezierEdgeProps = EdgePositions &
   BezierPathOptions &
   Omit<BaseEdgeProps, 'labelX' | 'labelY' | 'path'> &
-  Pick<EdgeProps, 'sourcePosition' | 'targetPosition'>
+  Pick<EdgeProps, 'sourcePosition' | 'targetPosition'>;
 
 export type SimpleBezierEdgeProps = EdgePositions &
   Omit<BaseEdgeProps, 'labelX' | 'labelY' | 'path'> &
-  Pick<EdgeProps, 'sourcePosition' | 'targetPosition'>
+  Pick<EdgeProps, 'sourcePosition' | 'targetPosition'>;
 
-export type StraightEdgeProps = EdgePositions & Omit<BaseEdgeProps, 'labelX' | 'labelY' | 'path'>
+export type StraightEdgeProps = EdgePositions &
+  Omit<BaseEdgeProps, 'labelX' | 'labelY' | 'path'>;
 
 export type StepEdgeProps = EdgePositions &
   Omit<BaseEdgeProps, 'labelX' | 'labelY' | 'path'> &
-  Pick<EdgeProps, 'sourcePosition' | 'targetPosition'>
+  Pick<EdgeProps, 'sourcePosition' | 'targetPosition'>;
 
 export type SmoothStepEdgeProps = EdgePositions &
   Omit<BaseEdgeProps, 'labelX' | 'labelY' | 'path'> &
   Pick<EdgeProps, 'sourcePosition' | 'targetPosition'> &
-  SmoothStepPathOptions
+  SmoothStepPathOptions;
 
 export type ToGraphEdge<T extends Edge> = GraphEdge<
   T extends Edge<infer Data> ? Data : never,
-  T extends Edge<never, infer CustomEvents> ? CustomEvents : never,
-  T extends Edge<never, never, infer Type> ? Type : never
->
+  T extends Edge<never, infer Type> ? Type : never
+>;

@@ -1,10 +1,5 @@
 // createExtendedEventHook.ts
-
-export interface EventHook<T> {
-  on: (fn: (param: T) => void) => { off: () => void };
-  off: (fn: (param: T) => void) => void;
-  trigger: (param: T) => Promise<PromiseSettledResult<any>[]>;
-}
+import { EventHook } from './eventHook.ts';
 
 export interface EventHookExtended<T> extends EventHook<T> {
   /** true if any user listeners are registered (emitter ignored) */

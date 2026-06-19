@@ -5,40 +5,40 @@
   --vf-handle: #555;
 }
 
-.vue-flow__edge {
+.flow__edge {
   &.updating {
-    .vue-flow__edge-path {
+    .flow__edge-path {
       stroke: #777;
     }
   }
 }
 
-.vue-flow__edge-text {
+.flow__edge-text {
   font-size: 10px;
 }
 
-.vue-flow__edge-textbg {
+.flow__edge-textbg {
   fill: #fff;
 }
 
-.vue-flow__connection-path {
+.flow__connection-path {
   stroke: var(--vf-connection-path);
 }
 
-.vue-flow__node {
+.flow__node {
   cursor: grab;
 }
 
-.vue-flow__node.selectable {
+.flow__node.selectable {
   &:focus,
   &:focus-visible {
     outline: none;
   }
 }
 
-.vue-flow__node-default,
-.vue-flow__node-input,
-.vue-flow__node-output {
+.flow__node-default,
+.flow__node-input,
+.flow__node-output {
   padding: 10px;
   border-radius: 3px;
   width: 150px;
@@ -62,20 +62,20 @@
     border: 1px solid #555;
   }
 
-  .vue-flow__handle {
+  .flow__handle {
     background: var(--vf-handle);
   }
 }
 
-.vue-flow__node-default.selectable,
-.vue-flow__node-input.selectable,
-.vue-flow__node-output.selectable {
+.flow__node-default.selectable,
+.flow__node-input.selectable,
+.flow__node-output.selectable {
   &:hover {
     box-shadow: 0 1px 4px 1px rgba(0, 0, 0, 0.08);
   }
 }
 
-.vue-flow__node-input {
+.flow__node-input {
   --vf-node-color: var(--vf-node-color, #0041d0);
   --vf-handle: var(--vf-node-color, #0041d0);
   --vf-box-shadow: var(--vf-node-color, #0041d0);
@@ -91,7 +91,7 @@
   }
 }
 
-.vue-flow__node-default {
+.flow__node-default {
   --vf-handle: var(--vf-node-color, #1a192b);
   --vf-box-shadow: var(--vf-node-color, #1a192b);
 
@@ -106,7 +106,7 @@
   }
 }
 
-.vue-flow__node-output {
+.flow__node-output {
   --vf-handle: var(--vf-node-color, #ff0072);
   --vf-box-shadow: var(--vf-node-color, #ff0072);
 
@@ -121,8 +121,8 @@
   }
 }
 
-.vue-flow__nodesselection-rect,
-.vue-flow__selection {
+.flow__nodesselection-rect,
+.flow__selection {
   background: rgba(0, 89, 220, 0.08);
   border: 1px dotted rgba(0, 89, 220, 0.8);
 
@@ -132,7 +132,7 @@
   }
 }
 
-.vue-flow__handle {
+.flow__handle {
   width: 6px;
   height: 6px;
   background: var(--vf-handle);

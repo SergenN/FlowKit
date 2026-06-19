@@ -1,29 +1,58 @@
-import type { Component, FunctionalComponent } from 'vue'
-import { Fragment, h } from 'vue'
-import Handle from '../Handle/Handle.vue'
-import type { NodeProps } from '../../types'
-import { Position } from '../../types'
+import type { NodeProps } from '../../types';
+import { Position } from '../../types';
 
-const DefaultNode: FunctionalComponent<NodeProps<{ label: any }>> = function ({
-  sourcePosition = Position.Bottom,
-  targetPosition = Position.Top,
-  label: _label,
-  connectable = true,
-  isValidTargetPos,
-  isValidSourcePos,
-  data,
-}) {
-  const label = data.label ?? _label
+export class DefaultNodeElement extends HTMLElement {
+  connectedCallback() {
+    this.render();
+  }
 
-  return [
-    h(Handle as Component, { type: 'target', position: targetPosition, connectable, isValidConnection: isValidTargetPos }),
-    typeof label !== 'string' && label ? h(label) : h(Fragment, [label]),
-    h(Handle as Component, { type: 'source', position: sourcePosition, connectable, isValidConnection: isValidSourcePos }),
-  ]
+  setProps(props: NodeProps<{ label: any }>) {
+    this.dataset.props = JSON.stringify(props);
+    this.render();
+  }
+
+  private render() {
+    this.innerHTML = '';
+
+    const raw = this.dataset.props;
+    if (!raw) return;
+
+    const props: NodeProps<{ label: any }> = JSON.parse(raw);
+
+    const {
+      sourcePosition = Position.Bottom,
+      targetPosition = Position.Top,
+      connectable = true,
+      data,
+    } = props;
+
+    const label = data?.label;
+
+    // target handle
+    const targetHandle = document.createElement('flow-handle') as any;
+    targetHandle.setAttribute('type', 'target');
+    targetHandle.setAttribute('position', targetPosition);
+    targetHandle.setAttribute('connectable', String(connectable));
+    this.appendChild(targetHandle);
+
+    // label
+    if (label) {
+      if (typeof label === 'string') {
+        const labelEl = document.createElement('div');
+        labelEl.textContent = label;
+        this.appendChild(labelEl);
+      } else if (label instanceof HTMLElement) {
+        this.appendChild(label);
+      }
+    }
+
+    // source handle
+    const sourceHandle = document.createElement('flow-handle') as any;
+    sourceHandle.setAttribute('type', 'source');
+    sourceHandle.setAttribute('position', sourcePosition);
+    sourceHandle.setAttribute('connectable', String(connectable));
+    this.appendChild(sourceHandle);
+  }
 }
 
-DefaultNode.props = ['sourcePosition', 'targetPosition', 'label', 'isValidTargetPos', 'isValidSourcePos', 'connectable', 'data']
-DefaultNode.inheritAttrs = false
-DefaultNode.compatConfig = { MODE: 3 }
-
-export default DefaultNode
+customElements.define('flow-default-node', DefaultNodeElement);

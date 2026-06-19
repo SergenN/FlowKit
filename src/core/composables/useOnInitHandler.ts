@@ -1,23 +1,24 @@
-import { watch } from 'vue'
-import { useVueFlow } from './useVueFlow'
+import { useFlowJs } from './useFlowJS';
 
-/**
- * Composable that handles the initialization of the viewport.
- *
- * @internal
- */
-export function useOnInitHandler() {
-  const vfInstance = useVueFlow()
+export function setupOnInitHandler(): () => void {
+  const store = useFlowJs();
 
-  watch(
-    () => vfInstance.viewportHelper.value.viewportInitialized,
-    (isInitialized) => {
-      if (isInitialized) {
-        setTimeout(() => {
-          vfInstance.emits.init(vfInstance)
-          vfInstance.emits.paneReady(vfInstance)
-        }, 1)
-      }
-    },
-  )
+  const interval = setInterval(() => {
+    // Check state directly — viewportHelper is a stale snapshot
+    const isReady = !!(
+      store.d3Zoom &&
+      store.d3Selection &&
+      store.dimensions.width &&
+      store.dimensions.height
+    );
+
+    if (isReady) {
+      clearInterval(interval);
+      setTimeout(() => {
+        store.emits.init(store);
+      }, 1);
+    }
+  }, 10);
+
+  return () => clearInterval(interval);
 }

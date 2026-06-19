@@ -1,26 +1,50 @@
-import type { Component, FunctionalComponent } from 'vue'
-import { Fragment, h } from 'vue'
-import Handle from '../Handle/Handle.vue'
-import type { NodeProps } from '../../types'
-import { Position } from '../../types'
+import type { NodeProps } from '../../types';
+import { Position } from '../../types';
 
-const InputNode: FunctionalComponent<NodeProps<{ label: any }>> = function ({
-  sourcePosition = Position.Bottom,
-  label: _label,
-  connectable = true,
-  isValidSourcePos,
-  data,
-}) {
-  const label = data.label ?? _label
+export class InputNodeElement extends HTMLElement {
+  connectedCallback() {
+    this.render();
+  }
 
-  return [
-    typeof label !== 'string' && label ? h(label) : h(Fragment, [label]),
-    h(Handle as Component, { type: 'source', position: sourcePosition, connectable, isValidConnection: isValidSourcePos }),
-  ]
+  setProps(props: NodeProps<{ label: any }>) {
+    this.dataset.props = JSON.stringify(props);
+    this.render();
+  }
+
+  private render() {
+    this.innerHTML = '';
+
+    const raw = this.dataset.props;
+    if (!raw) return;
+
+    const props: NodeProps<{ label: any }> = JSON.parse(raw);
+
+    const {
+      sourcePosition = Position.Bottom,
+      connectable = true,
+      data,
+    } = props;
+
+    const label = data?.label;
+
+    // label
+    if (label) {
+      if (typeof label === 'string') {
+        const labelEl = document.createElement('div');
+        labelEl.textContent = label;
+        this.appendChild(labelEl);
+      } else if (label instanceof HTMLElement) {
+        this.appendChild(label);
+      }
+    }
+
+    // source handle
+    const handle = document.createElement('flow-handle') as any;
+    handle.setAttribute('type', 'source');
+    handle.setAttribute('position', sourcePosition);
+    handle.setAttribute('connectable', String(connectable));
+    this.appendChild(handle);
+  }
 }
 
-InputNode.props = ['sourcePosition', 'label', 'isValidSourcePos', 'connectable', 'data']
-InputNode.inheritAttrs = false
-InputNode.compatConfig = { MODE: 3 }
-
-export default InputNode
+customElements.define('flow-input-node', InputNodeElement);

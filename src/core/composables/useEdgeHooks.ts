@@ -1,7 +1,23 @@
-import type { EdgeEventsEmit, EdgeEventsOn, GraphEdge, VueFlowStore } from '../types'
-import { createExtendedEventHook } from '../utils'
+import type { FlowJsStore, EdgeMouseEvent, EdgeUpdateEvent } from '../types';
+import { createExtendedEventHook } from '../utils';
+import type { EventHookExtended } from '../utils';
 
-function createEdgeHooks() {
+type EdgeHooks = {
+  doubleClick: EventHookExtended<EdgeMouseEvent>;
+  click: EventHookExtended<EdgeMouseEvent>;
+  mouseEnter: EventHookExtended<EdgeMouseEvent>;
+  mouseMove: EventHookExtended<EdgeMouseEvent>;
+  mouseLeave: EventHookExtended<EdgeMouseEvent>;
+  contextMenu: EventHookExtended<EdgeMouseEvent>;
+  updateStart: EventHookExtended<EdgeMouseEvent>;
+  update: EventHookExtended<EdgeUpdateEvent>;
+  updateEnd: EventHookExtended<EdgeMouseEvent>;
+};
+
+export type EdgeEmit = { [K in keyof EdgeHooks]: EdgeHooks[K]['trigger'] };
+export type EdgeOn = { [K in keyof EdgeHooks]: EdgeHooks[K]['on'] };
+
+function createEdgeHooks(): EdgeHooks {
   return {
     doubleClick: createExtendedEventHook(),
     click: createExtendedEventHook(),
@@ -12,69 +28,47 @@ function createEdgeHooks() {
     updateStart: createExtendedEventHook(),
     update: createExtendedEventHook(),
     updateEnd: createExtendedEventHook(),
-  }
+  };
 }
 
-/**
- * Composable for handling edge events
- *
- * @internal
- */
-export function useEdgeHooks(edge: GraphEdge, emits: VueFlowStore['emits']): { emit: EdgeEventsEmit; on: EdgeEventsOn } {
-  const edgeHooks = createEdgeHooks()
+export function useEdgeHooks(emits: FlowJsStore['emits']): {
+  emit: EdgeEmit;
+  on: EdgeOn;
+} {
+  const edgeHooks = createEdgeHooks();
 
-  edgeHooks.doubleClick.on((event) => {
-    emits.edgeDoubleClick(event)
-    edge.events?.doubleClick?.(event)
-  })
+  edgeHooks.doubleClick.on((event) => emits.edgeDoubleClick(event));
+  edgeHooks.click.on((event) => emits.edgeClick(event));
+  edgeHooks.mouseEnter.on((event) => emits.edgeMouseEnter(event));
+  edgeHooks.mouseMove.on((event) => emits.edgeMouseMove(event));
+  edgeHooks.mouseLeave.on((event) => emits.edgeMouseLeave(event));
+  edgeHooks.contextMenu.on((event) => emits.edgeContextMenu(event));
+  edgeHooks.updateStart.on((event) => emits.edgeUpdateStart(event));
+  edgeHooks.update.on((event) => emits.edgeUpdate(event));
+  edgeHooks.updateEnd.on((event) => emits.edgeUpdateEnd(event));
 
-  edgeHooks.click.on((event) => {
-    emits.edgeClick(event)
-    edge.events?.click?.(event)
-  })
-
-  edgeHooks.mouseEnter.on((event) => {
-    emits.edgeMouseEnter(event)
-    edge.events?.mouseEnter?.(event)
-  })
-
-  edgeHooks.mouseMove.on((event) => {
-    emits.edgeMouseMove(event)
-    edge.events?.mouseMove?.(event)
-  })
-
-  edgeHooks.mouseLeave.on((event) => {
-    emits.edgeMouseLeave(event)
-    edge.events?.mouseLeave?.(event)
-  })
-
-  edgeHooks.contextMenu.on((event) => {
-    emits.edgeContextMenu(event)
-    edge.events?.contextMenu?.(event)
-  })
-
-  edgeHooks.updateStart.on((event) => {
-    emits.edgeUpdateStart(event)
-    edge.events?.updateStart?.(event)
-  })
-
-  edgeHooks.update.on((event) => {
-    emits.edgeUpdate(event)
-    edge.events?.update?.(event)
-  })
-
-  edgeHooks.updateEnd.on((event) => {
-    emits.edgeUpdateEnd(event)
-    edge.events?.updateEnd?.(event)
-  })
-
-  return Object.entries(edgeHooks).reduce(
-    (hooks, [key, value]) => {
-      hooks.emit[key as keyof EdgeEventsEmit] = value.trigger
-      hooks.on[key as keyof EdgeEventsOn] = value.on
-
-      return hooks
+  return {
+    emit: {
+      doubleClick: edgeHooks.doubleClick.trigger,
+      click: edgeHooks.click.trigger,
+      mouseEnter: edgeHooks.mouseEnter.trigger,
+      mouseMove: edgeHooks.mouseMove.trigger,
+      mouseLeave: edgeHooks.mouseLeave.trigger,
+      contextMenu: edgeHooks.contextMenu.trigger,
+      updateStart: edgeHooks.updateStart.trigger,
+      update: edgeHooks.update.trigger,
+      updateEnd: edgeHooks.updateEnd.trigger,
     },
-    { emit: {} as EdgeEventsEmit, on: {} as EdgeEventsOn },
-  )
+    on: {
+      doubleClick: edgeHooks.doubleClick.on,
+      click: edgeHooks.click.on,
+      mouseEnter: edgeHooks.mouseEnter.on,
+      mouseMove: edgeHooks.mouseMove.on,
+      mouseLeave: edgeHooks.mouseLeave.on,
+      contextMenu: edgeHooks.contextMenu.on,
+      updateStart: edgeHooks.updateStart.on,
+      update: edgeHooks.update.on,
+      updateEnd: edgeHooks.updateEnd.on,
+    },
+  };
 }

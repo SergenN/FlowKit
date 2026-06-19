@@ -1,46 +1,38 @@
-import { defineComponent, h } from 'vue'
-import type { SimpleBezierEdgeProps } from '../../types'
-import { Position } from '../../types'
-import BaseEdge from './BaseEdge.vue'
-import { getSimpleBezierPath } from './utils'
+import type { SimpleBezierEdgeProps } from '../../types';
+import { Position } from '../../types';
+import { getSimpleBezierPath } from './utils';
 
-const SimpleBezierEdge = defineComponent<SimpleBezierEdgeProps>({
-  name: 'SimpleBezierEdge',
-  props: [
-    'sourcePosition',
-    'targetPosition',
-    'label',
-    'labelStyle',
-    'labelShowBg',
-    'labelBgStyle',
-    'labelBgPadding',
-    'labelBgBorderRadius',
-    'sourceY',
-    'sourceX',
-    'targetX',
-    'targetY',
-    'markerEnd',
-    'markerStart',
-    'interactionWidth',
-  ] as any,
-  compatConfig: { MODE: 3 },
-  setup(props, { attrs }) {
-    return () => {
-      const [path, labelX, labelY] = getSimpleBezierPath({
-        ...props,
-        sourcePosition: props.sourcePosition ?? Position.Bottom,
-        targetPosition: props.targetPosition ?? Position.Top,
-      })
+export class SimpleBezierEdgeElement extends HTMLElement {
+  private props: Partial<SimpleBezierEdgeProps> = {};
 
-      return h(BaseEdge as any, {
-        path,
-        labelX,
-        labelY,
-        ...attrs,
-        ...props,
-      })
-    }
-  },
-})
+  connectedCallback() {
+    this.render();
+  }
 
-export default SimpleBezierEdge
+  setProps(props: SimpleBezierEdgeProps) {
+    this.props = props;
+    this.render();
+  }
+
+  private render() {
+    this.innerHTML = '';
+
+    const [path, labelX, labelY] = getSimpleBezierPath({
+      ...this.props,
+      sourcePosition: this.props.sourcePosition ?? Position.Bottom,
+      targetPosition: this.props.targetPosition ?? Position.Top,
+    } as SimpleBezierEdgeProps);
+
+    const baseEdge = document.createElement('flow-base-edge') as any;
+    baseEdge.setProps?.({
+      ...this.props,
+      path,
+      labelX,
+      labelY,
+    });
+
+    this.appendChild(baseEdge);
+  }
+}
+
+customElements.define('flow-simple-bezier-edge', SimpleBezierEdgeElement);

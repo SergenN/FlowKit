@@ -1,47 +1,38 @@
-import { defineComponent, h } from 'vue'
-import type { BezierEdgeProps } from '../../types'
-import { Position } from '../../types'
-import BaseEdge from './BaseEdge.vue'
-import { getBezierPath } from './utils'
+import type { BezierEdgeProps } from '../../types';
+import { Position } from '../../types';
+import { getBezierPath } from './utils';
 
-const BezierEdge = defineComponent<BezierEdgeProps>({
-  name: 'BezierEdge',
-  props: [
-    'sourcePosition',
-    'targetPosition',
-    'label',
-    'labelStyle',
-    'labelShowBg',
-    'labelBgStyle',
-    'labelBgPadding',
-    'labelBgBorderRadius',
-    'sourceY',
-    'sourceX',
-    'targetX',
-    'targetY',
-    'curvature',
-    'markerEnd',
-    'markerStart',
-    'interactionWidth',
-  ] as any,
-  compatConfig: { MODE: 3 },
-  setup(props, { attrs }) {
-    return () => {
-      const [path, labelX, labelY] = getBezierPath({
-        ...props,
-        sourcePosition: props.sourcePosition ?? Position.Bottom,
-        targetPosition: props.targetPosition ?? Position.Top,
-      })
+export class BezierEdgeElement extends HTMLElement {
+  private props: Partial<BezierEdgeProps> = {};
 
-      return h(BaseEdge as any, {
-        path,
-        labelX,
-        labelY,
-        ...attrs,
-        ...props,
-      })
-    }
-  },
-})
+  connectedCallback() {
+    this.render();
+  }
 
-export default BezierEdge
+  setProps(props: BezierEdgeProps) {
+    this.props = props;
+    this.render();
+  }
+
+  private render() {
+    this.innerHTML = '';
+
+    const [path, labelX, labelY] = getBezierPath({
+      ...this.props,
+      sourcePosition: this.props.sourcePosition ?? Position.Bottom,
+      targetPosition: this.props.targetPosition ?? Position.Top,
+    } as BezierEdgeProps);
+
+    const baseEdge = document.createElement('flow-base-edge') as any;
+    baseEdge.setProps?.({
+      ...this.props,
+      path,
+      labelX,
+      labelY,
+    });
+
+    this.appendChild(baseEdge);
+  }
+}
+
+customElements.define('flow-bezier-edge', BezierEdgeElement);

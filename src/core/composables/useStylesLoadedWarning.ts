@@ -1,17 +1,10 @@
-import { onMounted } from 'vue'
-import { ErrorCode, VueFlowError, isDev } from '../utils'
-import { useVueFlow } from './useVueFlow'
+import { ErrorCode, FlowJsError } from '../utils';
+import { FlowHooksEmit } from '../types';
 
-export function useStylesLoadedWarning() {
-  const { emits } = useVueFlow()
+export function checkStylesLoaded(emits: FlowHooksEmit) {
+  const pane = document.querySelector('.flow__pane');
 
-  onMounted(() => {
-    if (isDev()) {
-      const pane = document.querySelector('.vue-flow__pane')
-
-      if (pane && !(window.getComputedStyle(pane).zIndex === '1')) {
-        emits.error(new VueFlowError(ErrorCode.MISSING_STYLES))
-      }
-    }
-  })
+  if (pane && !(window.getComputedStyle(pane).zIndex === '1')) {
+    emits.error(new FlowJsError(ErrorCode.MISSING_STYLES));
+  }
 }

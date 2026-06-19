@@ -1,5 +1,5 @@
 {
-  "name": "${PROJECT_NAME}",
+  "name": "FlowJS",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,8 +9,19 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "^5.2.2",
+    "@types/d3-drag": "^3.0.7",
+    "@types/d3-interpolate": "^3.0.4",
+    "@types/d3-selection": "^3.0.11",
+    "@types/d3-transition": "^3.0.9",
+    "@types/d3-zoom": "^3.0.8",
     "prettier": "^3.3.1",
-    "vite": "^5.2.0"
+    "typescript": "^5.2.2",
+    "vite": "^8.0.16"
+  },
+  "dependencies": {
+    "d3-drag": "^3.0.0",
+    "d3-interpolate": "^3.0.1",
+    "d3-selection": "^3.0.0",
+    "d3-zoom": "^3.0.0"
   }
 }

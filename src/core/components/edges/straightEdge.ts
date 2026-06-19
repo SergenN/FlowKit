@@ -1,39 +1,35 @@
-import { defineComponent, h } from 'vue'
-import type { StraightEdgeProps } from '../../types'
-import BaseEdge from './BaseEdge.vue'
-import { getStraightPath } from './utils'
+import type { StraightEdgeProps } from '../../types';
+import { getStraightPath } from './utils';
 
-const StraightEdge = defineComponent<StraightEdgeProps>({
-  name: 'StraightEdge',
-  props: [
-    'label',
-    'labelStyle',
-    'labelShowBg',
-    'labelBgStyle',
-    'labelBgPadding',
-    'labelBgBorderRadius',
-    'sourceY',
-    'sourceX',
-    'targetX',
-    'targetY',
-    'markerEnd',
-    'markerStart',
-    'interactionWidth',
-  ] as any,
-  compatConfig: { MODE: 3 },
-  setup(props, { attrs }) {
-    return () => {
-      const [path, labelX, labelY] = getStraightPath(props)
+export class StraightEdgeElement extends HTMLElement {
+  private props: Partial<StraightEdgeProps> = {};
 
-      return h(BaseEdge as any, {
-        path,
-        labelX,
-        labelY,
-        ...attrs,
-        ...props,
-      })
-    }
-  },
-})
+  connectedCallback() {
+    this.render();
+  }
 
-export default StraightEdge
+  setProps(props: StraightEdgeProps) {
+    this.props = props;
+    this.render();
+  }
+
+  private render() {
+    this.innerHTML = '';
+
+    const [path, labelX, labelY] = getStraightPath(
+      this.props as StraightEdgeProps,
+    );
+
+    const baseEdge = document.createElement('flow-base-edge') as any;
+    baseEdge.setProps?.({
+      ...this.props,
+      path,
+      labelX,
+      labelY,
+    });
+
+    this.appendChild(baseEdge);
+  }
+}
+
+customElements.define('flow-straight-edge', StraightEdgeElement);

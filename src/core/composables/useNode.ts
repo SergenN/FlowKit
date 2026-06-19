@@ -1,38 +1,24 @@
-import { computed, inject, ref } from 'vue'
-import type { CustomEvent, ElementData } from '../types'
-import { ErrorCode, VueFlowError, getConnectedEdges } from '../utils'
-import { NodeRef } from '../context'
-import { useVueFlow } from './useVueFlow'
-import { useNodeId } from './useNodeId'
+import type { ElementData, GraphNode } from '../types';
+import { ErrorCode, FlowJsError, getConnectedEdges } from '../utils';
+import { useFlowJs } from './useFlowJS';
 
-/**
- * Composable that provides access to a node object, parent node object, connected edges and it's dom element
- *
- * If no node id is provided, the node id is injected from context
- *
- * If you do not provide an id, this composable has to be called in a child of your custom node component, or it will throw
- *
- * @public
- * @param id - The id of the node to access
- * @returns the node id, the node, the node dom element, it's parent and connected edges
- */
-export function useNode<Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any>(id?: string) {
-  const nodeId = id ?? useNodeId() ?? ''
-  const nodeEl = inject(NodeRef, ref(null))
+export function useNode<Data = ElementData>(
+  id: string,
+  nodeEl?: HTMLElement | null,
+) {
+  const { findNode, edges, emits } = useFlowJs();
 
-  const { findNode, edges, emits } = useVueFlow()
-
-  const node = findNode<Data, CustomEvents>(nodeId)!
+  const node = findNode<Data>(id);
 
   if (!node) {
-    emits.error(new VueFlowError(ErrorCode.NODE_NOT_FOUND, nodeId))
+    emits.error(new FlowJsError(ErrorCode.NODE_NOT_FOUND, id));
   }
 
   return {
-    id: nodeId,
-    nodeEl,
-    node,
-    parentNode: computed(() => findNode(node.parentNode)),
-    connectedEdges: computed(() => getConnectedEdges([node], edges.value)),
-  }
+    id,
+    nodeEl: nodeEl ?? null,
+    node: node as GraphNode<Data>,
+    parentNode: node?.parentId ? findNode(node.parentId) : undefined,
+    connectedEdges: getConnectedEdges(node ? [node as GraphNode] : [], edges),
+  };
 }

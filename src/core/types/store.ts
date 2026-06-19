@@ -1,38 +1,34 @@
-import type { CSSProperties, ComputedRef, ToRefs } from 'vue'
-import type { KeyFilter } from '@vueuse/core'
 import type { ViewportHelper } from '../composables'
 import type {
   Dimensions,
   ElementData,
   Elements,
-  FlowElements,
   FlowExportObject,
   FlowImportObject,
-  FlowOptions,
   FlowProps,
   Rect,
   SelectionMode,
   SelectionRect,
   SnapGrid,
   XYPosition,
-} from './flow'
+} from './flow';
 import type { DefaultEdgeTypes, DefaultNodeTypes, EdgeComponent, NodeComponent } from './components'
 import type {
   Connection,
   ConnectionLineOptions,
-  ConnectionLineType,
   ConnectionLookup,
   ConnectionMode,
   ConnectionStatus,
   Connector,
-  HandleConnection,
-} from './connection'
+  NodeConnection,
+} from './connection';
 import type { DefaultEdgeOptions, Edge, EdgeUpdatable, GraphEdge } from './edge'
 import type { CoordinateExtent, CoordinateExtentRange, GraphNode, Node } from './node'
 import type { D3Selection, D3Zoom, D3ZoomHandler, PanOnScrollMode, ViewportTransform } from './zoom'
-import type { CustomEvent, FlowHooks, FlowHooksEmit, FlowHooksOn } from './hooks'
+import type { FlowHooks, FlowHooksEmit, FlowHooksOn } from './hooks'
 import type { EdgeChange, NodeChange, NodeDragItem } from './changes'
 import type { ConnectingHandle, HandleType, ValidConnectionFunc } from './handle'
+import { KeyFilter } from '../utils';
 
 export type NodeLookup = Map<string, GraphNode>
 
@@ -45,125 +41,121 @@ export interface UpdateNodeDimensionsParams {
 }
 
 export interface State extends Omit<FlowProps, 'id' | 'modelValue'> {
-  /** Vue flow element ref */
-  vueFlowRef: HTMLDivElement | null
-  /** Vue flow viewport element */
-  viewportRef: HTMLDivElement | null
+  /** flowJs element ref */
+  flowRef: HTMLDivElement | null;
+  /** flowJs viewport element */
+  viewportRef: HTMLDivElement | null;
 
   /** Event hooks, you can manipulate the triggers at your own peril */
-  readonly hooks: FlowHooks
+  readonly hooks: FlowHooks;
 
   /** all stored nodes */
-  nodes: GraphNode[]
+  nodes: GraphNode[];
   /** all stored edges */
-  edges: GraphEdge[]
+  edges: GraphEdge[];
 
-  connectionLookup: ConnectionLookup
+  connectionLookup: ConnectionLookup;
 
-  readonly d3Zoom: D3Zoom | null
-  readonly d3Selection: D3Selection | null
-  readonly d3ZoomHandler: D3ZoomHandler | null
+  readonly d3Zoom: D3Zoom | null;
+  readonly d3Selection: D3Selection | null;
+  readonly d3ZoomHandler: D3ZoomHandler | null;
 
   /** use setMinZoom action to change minZoom */
-  minZoom: number
+  minZoom: number;
   /** use setMaxZoom action to change maxZoom */
-  maxZoom: number
-  defaultViewport: Partial<ViewportTransform>
+  maxZoom: number;
+  defaultViewport: Partial<ViewportTransform>;
   /** use setTranslateExtent action to change translateExtent */
-  translateExtent: CoordinateExtent
-  nodeExtent: CoordinateExtent | CoordinateExtentRange
+  translateExtent: CoordinateExtent;
+  nodeExtent: CoordinateExtent | CoordinateExtentRange;
 
   /** viewport dimensions - do not change! */
-  readonly dimensions: Dimensions
+  dimensions: Dimensions;
   /** viewport transform x, y, z - do not change!  */
-  readonly viewport: ViewportTransform
+  viewport: ViewportTransform;
   /** if true will skip rendering any elements currently not inside viewport until they become visible */
-  onlyRenderVisibleElements: boolean
-  nodesSelectionActive: boolean
-  userSelectionActive: boolean
-  multiSelectionActive: boolean
+  onlyRenderVisibleElements: boolean;
+  nodesSelectionActive: boolean;
+  userSelectionActive: boolean;
+  multiSelectionActive: boolean;
 
-  deleteKeyCode: KeyFilter | null
-  selectionKeyCode: KeyFilter | boolean | null
-  multiSelectionKeyCode: KeyFilter | null
-  zoomActivationKeyCode: KeyFilter | null
-  panActivationKeyCode: KeyFilter | null
+  deleteKeyCode: KeyFilter | null;
+  selectionKeyCode: KeyFilter | boolean | null;
+  multiSelectionKeyCode: KeyFilter | null;
+  zoomActivationKeyCode: KeyFilter | null;
+  panActivationKeyCode: KeyFilter | null;
 
-  connectionMode: ConnectionMode
-  connectionLineOptions: ConnectionLineOptions
-  /** @deprecated use {@link ConnectionLineOptions.type} */
-  connectionLineType: ConnectionLineType | null
-  /** @deprecated use {@link ConnectionLineOptions.style} */
-  connectionLineStyle: CSSProperties | null
-  connectionStartHandle: ConnectingHandle | null
-  connectionEndHandle: ConnectingHandle | null
-  connectionClickStartHandle: ConnectingHandle | null
-  connectionPosition: XYPosition
-  connectionRadius: number
-  connectionStatus: ConnectionStatus | null
-  isValidConnection: ValidConnectionFunc | null
+  connectionMode: ConnectionMode;
+  connectionLineOptions: ConnectionLineOptions;
+  connectionStartHandle: ConnectingHandle | null;
+  connectionEndHandle: ConnectingHandle | null;
+  connectionClickStartHandle: ConnectingHandle | null;
+  connectionPosition: XYPosition;
+  connectionRadius: number;
+  connectionStatus: ConnectionStatus | null;
+  isValidConnection: ValidConnectionFunc | null;
 
-  connectOnClick: boolean
-  edgeUpdaterRadius: number
+  connectOnClick: boolean;
+  edgeUpdaterRadius: number;
 
-  snapToGrid: boolean
-  snapGrid: SnapGrid
-  defaultMarkerColor: string
+  snapToGrid: boolean;
+  snapGrid: SnapGrid;
+  defaultMarkerColor: string;
 
-  edgesUpdatable: EdgeUpdatable
-  edgesFocusable: boolean
+  edgesUpdatable: EdgeUpdatable;
+  edgesFocusable: boolean;
 
-  nodesFocusable: boolean
-  nodesDraggable: boolean
-  nodesConnectable: boolean
-  nodeDragThreshold: number
+  nodesFocusable: boolean;
+  nodesDraggable: boolean;
+  nodesConnectable: boolean;
+  nodeDragThreshold: number;
 
-  elementsSelectable: boolean
-  selectNodesOnDrag: boolean
+  elementsSelectable: boolean;
+  selectNodesOnDrag: boolean;
 
-  userSelectionRect: SelectionRect | null
-  selectionMode: SelectionMode
-  panOnDrag: boolean | number[]
-  zoomOnScroll: boolean
-  zoomOnPinch: boolean
-  panOnScroll: boolean
-  panOnScrollSpeed: number
-  panOnScrollMode: PanOnScrollMode
-  paneClickDistance: number
-  zoomOnDoubleClick: boolean
-  preventScrolling: boolean
-  paneDragging: boolean
+  userSelectionRect: SelectionRect | null;
+  selectionMode: SelectionMode;
+  panOnDrag: boolean | number[];
+  zoomOnScroll: boolean;
+  zoomOnPinch: boolean;
+  panOnScroll: boolean;
+  panOnScrollSpeed: number;
+  panOnScrollMode: PanOnScrollMode;
+  paneClickDistance: number;
+  zoomOnDoubleClick: boolean;
+  preventScrolling: boolean;
+  paneDragging: boolean;
 
-  initialized: boolean
-  applyDefault: boolean
-  autoConnect: boolean | Connector
+  initialized: boolean;
+  applyDefault: boolean;
+  autoConnect: boolean | Connector;
 
-  fitViewOnInit: boolean
-  fitViewOnInitDone: boolean
+  fitViewOnInit: boolean;
+  fitViewOnInitDone: boolean;
 
-  noDragClassName: 'nodrag' | string
-  noWheelClassName: 'nowheel' | string
-  noPanClassName: 'nopan' | string
+  noDragClassName: 'nodrag' | string;
+  noWheelClassName: 'nowheel' | string;
+  noPanClassName: 'nopan' | string;
 
-  defaultEdgeOptions: DefaultEdgeOptions | undefined
+  defaultEdgeOptions: DefaultEdgeOptions | undefined;
 
-  elevateEdgesOnSelect: boolean
-  elevateNodesOnSelect: boolean
+  elevateEdgesOnSelect: boolean;
+  elevateNodesOnSelect: boolean;
 
-  autoPanOnConnect: boolean
-  autoPanOnNodeDrag: boolean
+  autoPanOnConnect: boolean;
+  autoPanOnNodeDrag: boolean;
   /**
    * The speed at which the viewport pans while dragging a node or a selection box.
    * @default 15
    */
-  autoPanSpeed: number
+  autoPanSpeed: number;
 
-  disableKeyboardA11y: boolean
+  disableKeyboardA11y: boolean;
 
-  ariaLiveMessage: string
+  ariaLiveMessage: string;
 }
 
-export type SetElements = (elements: Elements | ((elements: FlowElements) => Elements)) => void
+export type SetElements = (elements: Elements | ((elements: Elements) => Elements)) => void
 
 export type SetNodes = (nodes: Node[] | ((nodes: GraphNode[]) => Node[])) => void
 
@@ -190,17 +182,23 @@ export type AddEdges = (
 
 export type UpdateEdge = (oldEdge: GraphEdge, newConnection: Connection, shouldReplaceId?: boolean) => GraphEdge | false
 
-export type UpdateEdgeData = <Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any>(
+export type UpdateEdgeData = <
+  Data = ElementData
+>(
   id: string,
-  dataUpdate: Partial<Data> | ((edge: GraphEdge<Data, CustomEvents>) => Partial<Data>),
+  dataUpdate:
+    | Partial<Data>
+    | ((edge: GraphEdge<Data>) => Partial<Data>),
   options?: { replace: boolean },
-) => void
+) => void;
 
 export type SetState = (
   state:
-    | Partial<FlowOptions & Omit<State, 'nodes' | 'edges' | 'modelValue'>>
-    | ((state: State) => Partial<FlowOptions & Omit<State, 'nodes' | 'edges' | 'modelValue'>>),
-) => void
+    | Partial<FlowProps & Omit<State, 'nodes' | 'edges' | 'modelValue'>>
+    | ((
+        state: State,
+      ) => Partial<FlowProps & Omit<State, 'nodes' | 'edges' | 'modelValue'>>),
+) => void;
 
 export type UpdateNodePosition = (dragItems: NodeDragItem[], changed: boolean, dragging: boolean) => void
 
@@ -208,13 +206,13 @@ export type UpdateNodeDimensions = (updates: UpdateNodeDimensionsParams[]) => vo
 
 export type UpdateNodeInternals = (nodeIds?: string[]) => void
 
-export type FindNode = <Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any>(
+export type FindNode = <Data = ElementData>(
   id: string | undefined | null,
-) => GraphNode<Data, CustomEvents> | undefined
+) => GraphNode<Data> | undefined
 
-export type FindEdge = <Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any>(
+export type FindEdge = <Data = ElementData>(
   id: string | undefined | null,
-) => GraphEdge<Data, CustomEvents> | undefined
+) => GraphEdge<Data> | undefined
 
 export type GetIntersectingNodes = (
   node: (Partial<Node> & { id: Node['id'] }) | Rect,
@@ -222,15 +220,15 @@ export type GetIntersectingNodes = (
   nodes?: GraphNode[],
 ) => GraphNode[]
 
-export type UpdateNode = <Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any>(
+export type UpdateNode = <Data = ElementData>(
   id: string,
-  nodeUpdate: Partial<Node<Data, CustomEvents>> | ((node: GraphNode<Data, CustomEvents>) => Partial<Node<Data, CustomEvents>>),
+  nodeUpdate: Partial<Node<Data>> | ((node: GraphNode<Data>) => Partial<Node<Data>>),
   options?: { replace: boolean },
 ) => void
 
-export type UpdateNodeData = <Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any>(
+export type UpdateNodeData = <Data = ElementData>(
   id: string,
-  dataUpdate: Partial<Data> | ((node: GraphNode<Data, CustomEvents>) => Partial<Data>),
+  dataUpdate: Partial<Data> | ((node: GraphNode<Data>) => Partial<Data>),
   options?: { replace: boolean },
 ) => void
 
@@ -267,11 +265,6 @@ export interface Actions extends Omit<ViewportHelper, 'viewportInitialized'> {
   applyEdgeChanges: (changes: EdgeChange[]) => GraphEdge[]
   /** applies default node change handler */
   applyNodeChanges: (changes: NodeChange[]) => GraphNode[]
-  /**
-   * manually select elements and add to state
-   * @deprecated will be removed in the next major, use {@link Actions.addSelectedNodes} or {@link Actions.addSelectedEdges} instead
-   */
-  addSelectedElements: (elements: FlowElements) => void
   /** manually select edges and add to state */
   addSelectedEdges: (edges: GraphEdge[]) => void
   /** manually select nodes and add to state */
@@ -324,11 +317,11 @@ export interface Actions extends Omit<ViewportHelper, 'viewportInitialized'> {
   /** get a node's connected edges */
   getConnectedEdges: (nodesOrId: Node[] | string) => GraphEdge[]
   /** get all connections of a handle belonging to a node */
-  getHandleConnections: ({ id, type, nodeId }: { id?: string | null; type: HandleType; nodeId: string }) => HandleConnection[]
+  getHandleConnections: ({ id, type, nodeId }: { id?: string | null; type: HandleType; nodeId: string }) => NodeConnection[]
   /** pan the viewport; return indicates if a transform has happened or not */
   panBy: (delta: XYPosition) => boolean
   /** viewport helper instance */
-  viewportHelper: ComputedRef<ViewportHelper>
+  viewportHelper: ViewportHelper
 
   /** reset state to defaults */
   $reset: () => void
@@ -339,58 +332,40 @@ export interface Actions extends Omit<ViewportHelper, 'viewportInitialized'> {
 
 export interface Getters {
   /** returns object containing current edge types */
-  getEdgeTypes: Record<keyof DefaultEdgeTypes | string, EdgeComponent>
+  getEdgeTypes: Record<keyof DefaultEdgeTypes | string, EdgeComponent>;
   /** returns object containing current node types */
-  getNodeTypes: Record<keyof DefaultNodeTypes | string, NodeComponent>
-  /**
-   * get all elements
-   * @deprecated - will be removed in next major version
-   */
-  getElements: FlowElements
+  getNodeTypes: Record<keyof DefaultNodeTypes | string, NodeComponent>;
   /** all visible node */
-  getNodes: GraphNode[]
+  getNodes: GraphNode[];
   /** all visible edges */
-  getEdges: GraphEdge[]
-  /**
-   * returns a node by id
-   * @deprecated use {@link Actions.findNode} instead
-   */
-  getNode: (id: string) => GraphNode | undefined
-  /**
-   * returns an edge by id
-   * @deprecated use {@link Actions.findEdge} instead
-   */
-  getEdge: (id: string) => GraphEdge | undefined
+  getEdges: GraphEdge[];
   /** returns all currently selected elements */
-  getSelectedElements: FlowElements
+  getSelectedElements: (GraphNode | GraphEdge)[];
   /** returns all currently selected nodes */
-  getSelectedNodes: GraphNode[]
+  getSelectedNodes: GraphNode[];
   /** returns all currently selected edges */
-  getSelectedEdges: GraphEdge[]
-  /**
-   * returns all nodes that are initialized, i.e. they have actual dimensions
-   * @deprecated - will be removed in next major version; use {@link useNodesInitialized} instead
-   */
-  getNodesInitialized: GraphNode[]
-  /**
-   * returns a boolean flag whether all current nodes are initialized
-   * @deprecated - will be removed in next major version; use {@link useNodesInitialized} instead
-   */
-  areNodesInitialized: boolean
+  getSelectedEdges: GraphEdge[];
 }
 
 export type ComputedGetters = {
-  [key in keyof Getters]: ComputedRef<Getters[key]>
-}
+  getEdgeTypes: () => Record<keyof DefaultEdgeTypes | string, EdgeComponent>;
+  getNodeTypes: () => Record<keyof DefaultNodeTypes | string, NodeComponent>;
+  getNodes: () => GraphNode[];
+  getEdges: () => GraphEdge[];
+  getSelectedElements: () => (GraphNode | GraphEdge)[];
+  getSelectedNodes: () => GraphNode[];
+  getSelectedEdges: () => GraphEdge[];
+};
 
-export type VueFlowStore = {
-  readonly id: string
-  readonly emits: FlowHooksEmit
-  readonly nodeLookup: ComputedRef<NodeLookup>
-  readonly edgeLookup: ComputedRef<EdgeLookup>
-  /** current vue flow version you're using */
-  readonly vueFlowVersion: string
+export type FlowJsStore = {
+  readonly id: string;
+  readonly emits: FlowHooksEmit;
+  readonly nodeLookup: NodeLookup;
+  readonly edgeLookup: EdgeLookup;
+  readonly flowJsVersion?: string;
+  readonly dimensions: Dimensions;
+  readonly viewport: ViewportTransform;
 } & FlowHooksOn &
-  ToRefs<State> &
+  State &
   Readonly<ComputedGetters> &
-  Readonly<Actions>
+  Readonly<Actions>;

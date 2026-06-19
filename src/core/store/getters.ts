@@ -1,55 +1,54 @@
-import type { ComputedRef } from 'vue'
-import { computed } from 'vue'
-import type { ComputedGetters, EdgeLookup, GraphEdge, GraphNode, NodeLookup, State } from '../types'
-import { getNodesInside, isEdgeVisible } from '../utils'
-import { defaultEdgeTypes, defaultNodeTypes } from '../utils/defaultNodesEdges'
+import type {
+  ComputedGetters,
+  EdgeComponent,
+  GraphEdge,
+  GraphNode,
+  NodeComponent,
+  NodeLookup,
+  State,
+} from '../types';
+import {
+  getNodesInside,
+  isEdgeVisible,
+  defaultEdgeTypes,
+  defaultNodeTypes,
+} from '../utils';
 
 export function useGetters(
   state: State,
-  nodeLookup: ComputedRef<NodeLookup>,
-  edgeLookup: ComputedRef<EdgeLookup>,
+  nodeLookup: NodeLookup,
 ): ComputedGetters {
-  /**
-   * @deprecated will be removed in next major version; use findNode instead
-   */
-  const getNode: ComputedGetters['getNode'] = computed(() => (id) => nodeLookup.value.get(id))
-
-  /**
-   * @deprecated will be removed in next major version; use findEdge instead
-   */
-  const getEdge: ComputedGetters['getEdge'] = computed(() => (id) => edgeLookup.value.get(id))
-
-  const getEdgeTypes: ComputedGetters['getEdgeTypes'] = computed(() => {
+  const getEdgeTypes = (): Record<string, EdgeComponent> => {
     const edgeTypes: Record<string, any> = {
       ...defaultEdgeTypes,
       ...state.edgeTypes,
-    }
+    };
 
-    const keys = Object.keys(edgeTypes)
+    const keys = Object.keys(edgeTypes);
 
     for (const e of state.edges) {
-      e.type && !keys.includes(e.type) && (edgeTypes[e.type] = e.type)
+      e.type && !keys.includes(e.type) && (edgeTypes[e.type] = e.type);
     }
 
-    return edgeTypes
-  })
+    return edgeTypes;
+  };
 
-  const getNodeTypes: ComputedGetters['getNodeTypes'] = computed(() => {
+  const getNodeTypes = (): Record<string, NodeComponent> => {
     const nodeTypes: Record<string, any> = {
       ...defaultNodeTypes,
       ...state.nodeTypes,
-    }
+    };
 
-    const keys = Object.keys(nodeTypes)
+    const keys = Object.keys(nodeTypes);
 
     for (const n of state.nodes) {
-      n.type && !keys.includes(n.type) && (nodeTypes[n.type] = n.type)
+      n.type && !keys.includes(n.type) && (nodeTypes[n.type] = n.type);
     }
 
-    return nodeTypes
-  })
+    return nodeTypes;
+  };
 
-  const getNodes: ComputedGetters['getNodes'] = computed(() => {
+  const getNodes = (): GraphNode[] => {
     if (state.onlyRenderVisibleElements) {
       return getNodesInside(
         state.nodes,
@@ -61,19 +60,19 @@ export function useGetters(
         },
         state.viewport,
         true,
-      )
+      );
     }
 
-    return state.nodes
-  })
+    return state.nodes;
+  };
 
-  const getEdges: ComputedGetters['getEdges'] = computed(() => {
+  const getEdges = (): GraphEdge[] => {
     if (state.onlyRenderVisibleElements) {
-      const visibleEdges: GraphEdge[] = []
+      const visibleEdges: GraphEdge[] = [];
 
       for (const edge of state.edges) {
-        const source = nodeLookup.value.get(edge.source)!
-        const target = nodeLookup.value.get(edge.target)!
+        const source = nodeLookup.get(edge.source)!;
+        const target = nodeLookup.get(edge.target)!;
 
         if (
           isEdgeVisible({
@@ -88,71 +87,42 @@ export function useGetters(
             viewport: state.viewport,
           })
         ) {
-          visibleEdges.push(edge)
+          visibleEdges.push(edge);
         }
       }
 
-      return visibleEdges
+      return visibleEdges;
     }
 
-    return state.edges
-  })
+    return state.edges;
+  };
 
-  const getElements: ComputedGetters['getElements'] = computed(() => [...getNodes.value, ...getEdges.value])
-
-  const getSelectedNodes: ComputedGetters['getSelectedNodes'] = computed(() => {
-    const selectedNodes: GraphNode[] = []
+  const getSelectedNodes = (): GraphNode[] => {
+    const selectedNodes: GraphNode[] = [];
     for (const node of state.nodes) {
       if (node.selected) {
-        selectedNodes.push(node)
+        selectedNodes.push(node);
       }
     }
+    return selectedNodes;
+  };
 
-    return selectedNodes
-  })
-
-  const getSelectedEdges: ComputedGetters['getSelectedEdges'] = computed(() => {
-    const selectedEdges: GraphEdge[] = []
+  const getSelectedEdges = (): GraphEdge[] => {
+    const selectedEdges: GraphEdge[] = [];
     for (const edge of state.edges) {
       if (edge.selected) {
-        selectedEdges.push(edge)
+        selectedEdges.push(edge);
       }
     }
+    return selectedEdges;
+  };
 
-    return selectedEdges
-  })
-
-  const getSelectedElements: ComputedGetters['getSelectedElements'] = computed(() => [
-    ...getSelectedNodes.value,
-    ...getSelectedEdges.value,
-  ])
-
-  /**
-   * @deprecated will be removed in next major version; use `useNodesInitialized` instead
-   */
-  const getNodesInitialized: ComputedGetters['getNodesInitialized'] = computed(() => {
-    const initializedNodes: GraphNode[] = []
-
-    for (const node of state.nodes) {
-      if (!!node.dimensions.width && !!node.dimensions.height && node.handleBounds !== undefined) {
-        initializedNodes.push(node)
-      }
-    }
-
-    return initializedNodes
-  })
-
-  /**
-   * @deprecated will be removed in next major version; use `useNodesInitialized` instead
-   */
-  const areNodesInitialized: ComputedGetters['areNodesInitialized'] = computed(
-    () => getNodes.value.length > 0 && getNodesInitialized.value.length === getNodes.value.length,
-  )
+  const getSelectedElements = (): (GraphNode | GraphEdge)[] => [
+    ...getSelectedNodes(),
+    ...getSelectedEdges(),
+  ];
 
   return {
-    getNode,
-    getEdge,
-    getElements,
     getEdgeTypes,
     getNodeTypes,
     getEdges,
@@ -160,7 +130,5 @@ export function useGetters(
     getSelectedElements,
     getSelectedNodes,
     getSelectedEdges,
-    getNodesInitialized,
-    areNodesInitialized,
-  }
+  };
 }

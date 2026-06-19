@@ -1,12 +1,16 @@
-import type { EventHookOn, EventHookTrigger } from '@vueuse/core'
 import type { D3ZoomEvent } from 'd3-zoom'
-import type { EventHookExtended, VueFlowError } from '../utils'
+import type {
+  EventHookExtended,
+  EventHookOn,
+  EventHookTrigger,
+  FlowJsError,
+} from '../utils';
 import type { GraphEdge } from './edge'
 import type { GraphNode } from './node'
 import type { Connection, OnConnectStartParams } from './connection'
 import type { ViewportTransform } from './zoom'
 import type { EdgeChange, NodeChange } from './changes'
-import type { VueFlowStore } from './store'
+import type { FlowJsStore } from './store'
 
 export type MouseTouchEvent = MouseEvent | TouchEvent
 
@@ -33,64 +37,71 @@ export interface EdgeUpdateEvent {
 }
 
 export interface FlowEvents {
-  nodesChange: NodeChange[]
-  edgesChange: EdgeChange[]
-  nodeDoubleClick: NodeMouseEvent
-  nodeClick: NodeMouseEvent
-  nodeMouseEnter: NodeMouseEvent
-  nodeMouseMove: NodeMouseEvent
-  nodeMouseLeave: NodeMouseEvent
-  nodeContextMenu: NodeMouseEvent
-  nodeDragStart: NodeDragEvent
-  nodeDrag: NodeDragEvent
-  nodeDragStop: NodeDragEvent
-  nodesInitialized: GraphNode[]
-  updateNodeInternals: string[]
-  miniMapNodeClick: NodeMouseEvent
-  miniMapNodeDoubleClick: NodeMouseEvent
-  miniMapNodeMouseEnter: NodeMouseEvent
-  miniMapNodeMouseMove: NodeMouseEvent
-  miniMapNodeMouseLeave: NodeMouseEvent
-  connect: Connection
+  nodesChange: NodeChange[];
+  edgesChange: EdgeChange[];
+  nodeDoubleClick: NodeMouseEvent;
+  nodeClick: NodeMouseEvent;
+  nodeMouseEnter: NodeMouseEvent;
+  nodeMouseMove: NodeMouseEvent;
+  nodeMouseLeave: NodeMouseEvent;
+  nodeContextMenu: NodeMouseEvent;
+  nodeDragStart: NodeDragEvent;
+  nodeDrag: NodeDragEvent;
+  nodeDragStop: NodeDragEvent;
+  nodesInitialized: GraphNode[];
+  updateNodeInternals: string[];
+  miniMapNodeClick: NodeMouseEvent;
+  miniMapNodeDoubleClick: NodeMouseEvent;
+  miniMapNodeMouseEnter: NodeMouseEvent;
+  miniMapNodeMouseMove: NodeMouseEvent;
+  miniMapNodeMouseLeave: NodeMouseEvent;
+  connect: Connection;
   connectStart: {
-    event?: MouseEvent | TouchEvent
-  } & OnConnectStartParams
-  connectEnd: MouseEvent | TouchEvent | undefined
+    event?: MouseEvent | TouchEvent;
+  } & OnConnectStartParams;
+  connectEnd: MouseEvent | TouchEvent | undefined;
   clickConnectStart: {
-    event?: MouseEvent | TouchEvent
-  } & OnConnectStartParams
-  clickConnectEnd: MouseEvent | TouchEvent | undefined
-  /** @deprecated use `init` instead */
-  paneReady: VueFlowStore
-  init: VueFlowStore
-  move: { event: D3ZoomEvent<HTMLDivElement, any> | WheelEvent; flowTransform: ViewportTransform }
-  moveStart: { event: D3ZoomEvent<HTMLDivElement, any> | WheelEvent; flowTransform: ViewportTransform }
-  moveEnd: { event: D3ZoomEvent<HTMLDivElement, any> | WheelEvent; flowTransform: ViewportTransform }
-  selectionDragStart: NodeDragEvent
-  selectionDrag: NodeDragEvent
-  selectionDragStop: NodeDragEvent
-  selectionContextMenu: { event: MouseEvent; nodes: GraphNode[] }
-  selectionStart: MouseEvent
-  selectionEnd: MouseEvent
-  viewportChangeStart: ViewportTransform
-  viewportChange: ViewportTransform
-  viewportChangeEnd: ViewportTransform
-  paneScroll: WheelEvent | undefined
-  paneClick: MouseEvent
-  paneContextMenu: MouseEvent
-  paneMouseEnter: PointerEvent
-  paneMouseMove: PointerEvent
-  paneMouseLeave: PointerEvent
-  edgeContextMenu: EdgeMouseEvent
-  edgeMouseEnter: EdgeMouseEvent
-  edgeMouseMove: EdgeMouseEvent
-  edgeMouseLeave: EdgeMouseEvent
-  edgeDoubleClick: EdgeMouseEvent
-  edgeClick: EdgeMouseEvent
-  edgeUpdateStart: EdgeMouseEvent
-  edgeUpdate: EdgeUpdateEvent
-  edgeUpdateEnd: EdgeMouseEvent
-  error: VueFlowError
+    event?: MouseEvent | TouchEvent;
+  } & OnConnectStartParams;
+  clickConnectEnd: MouseEvent | TouchEvent | undefined;
+  init: FlowJsStore;
+  move: {
+    event: D3ZoomEvent<HTMLDivElement, any> | WheelEvent;
+    flowTransform: ViewportTransform;
+  };
+  moveStart: {
+    event: D3ZoomEvent<HTMLDivElement, any> | WheelEvent;
+    flowTransform: ViewportTransform;
+  };
+  moveEnd: {
+    event: D3ZoomEvent<HTMLDivElement, any> | WheelEvent;
+    flowTransform: ViewportTransform;
+  };
+  selectionDragStart: NodeDragEvent;
+  selectionDrag: NodeDragEvent;
+  selectionDragStop: NodeDragEvent;
+  selectionContextMenu: { event: MouseEvent; nodes: GraphNode[] };
+  selectionStart: MouseEvent;
+  selectionEnd: MouseEvent;
+  viewportChangeStart: ViewportTransform;
+  viewportChange: ViewportTransform;
+  viewportChangeEnd: ViewportTransform;
+  paneScroll: WheelEvent | undefined;
+  paneClick: MouseEvent;
+  paneContextMenu: MouseEvent;
+  paneMouseEnter: PointerEvent;
+  paneMouseMove: PointerEvent;
+  paneMouseLeave: PointerEvent;
+  edgeContextMenu: EdgeMouseEvent;
+  edgeMouseEnter: EdgeMouseEvent;
+  edgeMouseMove: EdgeMouseEvent;
+  edgeMouseLeave: EdgeMouseEvent;
+  edgeDoubleClick: EdgeMouseEvent;
+  edgeClick: EdgeMouseEvent;
+  edgeUpdateStart: EdgeMouseEvent;
+  edgeUpdate: EdgeUpdateEvent;
+  edgeUpdateEnd: EdgeMouseEvent;
+  error: FlowJsError;
 }
 
 export type FlowHooks = Readonly<{
@@ -114,26 +125,6 @@ export type CustomEvent<Args extends any[] = any[], Return = any> = (...args: Ar
 type CustomEventHandlers<CustomEvents = object> = {
   [key in keyof CustomEvents]: CustomEvents[key]
 }
-
-export type NodeEventsHandler<CustomEvents = object> = {
-  doubleClick: (event: NodeMouseEvent) => void | { off: () => void }
-  click: (event: NodeMouseEvent) => void | { off: () => void }
-  mouseEnter: (event: NodeMouseEvent) => void | { off: () => void }
-  mouseMove: (event: NodeMouseEvent) => void | { off: () => void }
-  mouseLeave: (event: NodeMouseEvent) => void | { off: () => void }
-  contextMenu: (event: NodeMouseEvent) => void | { off: () => void }
-  dragStart: (event: NodeDragEvent) => void | { off: () => void }
-  drag: (event: NodeDragEvent) => void | { off: () => void }
-  dragStop: (event: NodeDragEvent) => void | { off: () => void }
-} & CustomEventHandlers<CustomEvents>
-
-export type NodeEventsOn<CustomEvents = object> = {
-  [key in keyof NodeEventsHandler]: EventHookOn<NodeEventsHandler[key] extends (event: infer Event) => any ? Event : never>
-} & CustomEventHandlers<CustomEvents>
-
-export type NodeEventsEmit<CustomEvents = object> = {
-  [key in keyof NodeEventsHandler]: EventHookTrigger<NodeEventsHandler[key] extends (event: infer Event) => any ? Event : never>
-} & CustomEventHandlers<CustomEvents>
 
 export type EdgeEventsHandler<CustomEvents = object> = {
   doubleClick: (event: EdgeMouseEvent) => void | { off: () => void }

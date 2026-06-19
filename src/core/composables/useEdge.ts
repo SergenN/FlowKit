@@ -1,8 +1,6 @@
-import { inject, ref } from 'vue'
-import type { CustomEvent, ElementData } from '../types'
-import { ErrorCode, VueFlowError } from '../utils'
-import { EdgeId, EdgeRef } from '../context'
-import { useVueFlow } from './useVueFlow'
+import type { ElementData } from '../types';
+import { ErrorCode, FlowJsError } from '../utils';
+import { useFlowJs } from './useFlowJS';
 
 /**
  * Composable that provides access to an edge object and it's dom element
@@ -13,23 +11,24 @@ import { useVueFlow } from './useVueFlow'
  *
  * @public
  * @param id - The id of the edge to access
+ * @param edgeEl
  * @returns the edge id, the edge and the edge dom element
  */
-export function useEdge<Data = ElementData, CustomEvents extends Record<string, CustomEvent> = any>(id?: string) {
-  const edgeId = id ?? inject(EdgeId, '')
-  const edgeEl = inject(EdgeRef, ref(null))
+export function useEdge<Data = ElementData>(
+  id: string,
+  edgeEl?: HTMLElement | SVGElement | null,
+) {
+  const { findEdge, emits } = useFlowJs();
 
-  const { findEdge, emits } = useVueFlow()
-
-  const edge = findEdge<Data, CustomEvents>(edgeId)!
+  const edge = findEdge<Data>(id);
 
   if (!edge) {
-    emits.error(new VueFlowError(ErrorCode.EDGE_NOT_FOUND, edgeId))
+    emits.error(new FlowJsError(ErrorCode.EDGE_NOT_FOUND, id));
   }
 
   return {
-    id: edgeId,
+    id,
     edge,
-    edgeEl,
-  }
+    edgeEl: edgeEl ?? null,
+  };
 }

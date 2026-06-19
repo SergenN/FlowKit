@@ -1,48 +1,44 @@
-import type { Ref } from 'vue'
-import { onBeforeUnmount, onMounted } from 'vue'
-import { ErrorCode, VueFlowError, getDimensions } from '../utils'
-import { useVueFlow } from './useVueFlow'
+import { ErrorCode, FlowJsError, getDimensions } from '../utils';
+import type { FlowJsStore } from '../types';
 
-/**
- * Composable that handles the resize of the viewport.
- *
- * @internal
- * @param viewportEl
- */
-export function useResizeHandler(viewportEl: Ref<HTMLDivElement | null>): void {
-  const { emits, dimensions } = useVueFlow()
+export function setupResizeHandler(
+  viewportEl: HTMLDivElement | null,
+  flowStore: FlowJsStore,
+): () => void {
+  let resizeObserver: ResizeObserver | undefined;
 
-  let resizeObserver: ResizeObserver
-
-  onMounted(() => {
-    const updateDimensions = () => {
-      if (!viewportEl.value || !(viewportEl.value.checkVisibility?.() ?? true)) {
-        return
-      }
-
-      const size = getDimensions(viewportEl.value)
-
-      if (size.width === 0 || size.height === 0) {
-        emits.error(new VueFlowError(ErrorCode.MISSING_VIEWPORT_DIMENSIONS))
-      }
-
-      dimensions.value = { width: size.width || 500, height: size.height || 500 }
+  const updateDimensions = () => {
+    if (!viewportEl || !(viewportEl.checkVisibility?.() ?? true)) {
+      return;
     }
 
-    updateDimensions()
-    window.addEventListener('resize', updateDimensions)
+    const size = getDimensions(viewportEl);
 
-    if (viewportEl.value) {
-      resizeObserver = new ResizeObserver(() => updateDimensions())
-      resizeObserver.observe(viewportEl.value)
+    if (size.width === 0 || size.height === 0) {
+      flowStore.emits.error(
+        new FlowJsError(ErrorCode.MISSING_VIEWPORT_DIMENSIONS),
+      );
     }
 
-    onBeforeUnmount(() => {
-      window.removeEventListener('resize', updateDimensions)
+    flowStore.dimensions = {
+      width: size.width || 500,
+      height: size.height || 500,
+    };
+  };
 
-      if (resizeObserver && viewportEl.value) {
-        resizeObserver.unobserve(viewportEl.value!)
-      }
-    })
-  })
+  updateDimensions();
+  window.addEventListener('resize', updateDimensions);
+
+  if (viewportEl) {
+    resizeObserver = new ResizeObserver(() => updateDimensions());
+    resizeObserver.observe(viewportEl);
+  }
+
+  return () => {
+    window.removeEventListener('resize', updateDimensions);
+
+    if (resizeObserver && viewportEl) {
+      resizeObserver.unobserve(viewportEl);
+    }
+  };
 }
