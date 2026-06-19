@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlowJS</title>
+</head>
+<body>
+<flow-js
+        id="my-flow"
+        nodes-draggable
+        elements-selectable
+        fit-view-on-init
+></flow-js>
+
+<script type="module" src="/main.ts"></script>
+
+<script type="module">
+    // access the store imperatively after the element is defined
+    customElements.whenDefined('flow-js').then(() => {
+        const flow = document.querySelector('flow-js')
+        const store = flow.getStore()
+
+        store.setNodes([
+            { id: '1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } },
+            { id: '2', position: { x: 200, y: 100 }, data: { label: 'Node 2' } },
+        ])
+
+        store.setEdges([
+            { id: 'e1-2', source: '1', target: '2' },
+        ])
+
+        // listen to events
+        flow.addEventListener('nodeClick', (event) => {
+            console.log('node clicked', event.detail)
+        })
+    })
+</script>
+</body>
+</html>
