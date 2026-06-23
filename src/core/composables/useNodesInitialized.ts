@@ -1,4 +1,4 @@
-import { useFlowJs } from './useFlowJS';
+import { useFlowKit } from './useFlowKit';
 
 export interface UseNodesInitializedOptions {
   includeHiddenNodes?: boolean;
@@ -7,7 +7,7 @@ export interface UseNodesInitializedOptions {
 export function getNodesInitialized(
   options: UseNodesInitializedOptions = { includeHiddenNodes: false },
 ): boolean {
-  const { nodes } = useFlowJs();
+  const { nodes } = useFlowKit();
 
   if (nodes.length === 0) {
     return false;

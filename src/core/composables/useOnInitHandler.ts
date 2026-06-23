@@ -1,7 +1,7 @@
-import { useFlowJs } from './useFlowJS';
+import { useFlowKit } from './useFlowKit';
 
 export function setupOnInitHandler(): () => void {
-  const store = useFlowJs();
+  const store = useFlowKit();
 
   const interval = setInterval(() => {
     // Check state directly — viewportHelper is a stale snapshot

@@ -1,10 +1,10 @@
-import type { Connection, HandleType, MouseTouchEvent } from '../../types';
+// import type { Connection, HandleType, MouseTouchEvent } from '../../types';
 import { ConnectionMode, Position } from '../../types';
-import { useEdgeHooks, useHandle, useFlowJs } from '../../composables';
+import { useEdgeHooks, useFlowKit } from '../../composables';
 import {
   ARIA_EDGE_DESC_KEY,
   ErrorCode,
-  FlowJsError,
+  FlowKitError,
   elementSelectionKeys,
   getEdgeHandle,
   getHandlePosition,
@@ -18,15 +18,15 @@ import {
 } from './utils';
 
 export class EdgeWrapperElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowJs>;
+  private store!: ReturnType<typeof useFlowKit>;
   private edgeId!: string;
   private cleanups: (() => void)[] = [];
 
   // private mouseOver = false;
   // private updating = false;
-  private nodeId = '';
-  private handleId: string | null = null;
-  private edgeUpdaterType: HandleType = 'source';
+  // private nodeId = '';
+  // private handleId: string | null = null;
+  // private edgeUpdaterType: HandleType = 'source';
 
   private emit!: ReturnType<typeof useEdgeHooks>['emit'];
   // private handlePointerDown!: (event: MouseTouchEvent) => void;
@@ -39,7 +39,7 @@ export class EdgeWrapperElement extends HTMLElement {
   private labelFo: SVGForeignObjectElement | null = null;
 
   connectedCallback() {
-    this.store = useFlowJs();
+    this.store = useFlowKit();
     this.edgeId = this.getAttribute('id') ?? '';
     this.style.display = 'none';
 
@@ -96,17 +96,17 @@ export class EdgeWrapperElement extends HTMLElement {
     const { emit } = useEdgeHooks(this.store.emits);
     this.emit = emit;
 
-    const { handlePointerDown } = useHandle({
-      nodeId: this.nodeId,
-      handleId: this.handleId,
-      type: this.edgeUpdaterType,
-      isValidConnection: this.store.isValidConnection,
-      edgeUpdaterType: this.edgeUpdaterType,
-      onEdgeUpdate: (event, connection) => this.onEdgeUpdate(event, connection),
-      onEdgeUpdateEnd: (event) => this.onEdgeUpdateEnd(event),
-    });
+    // const { handlePointerDown } = useHandle({
+    //   nodeId: this.nodeId,
+    //   handleId: this.handleId,
+    //   type: this.edgeUpdaterType,
+    //   isValidConnection: this.store.isValidConnection,
+    //   edgeUpdaterType: this.edgeUpdaterType,
+    //   onEdgeUpdate: (event, connection) => this.onEdgeUpdate(event, connection),
+    //   onEdgeUpdateEnd: (event) => this.onEdgeUpdateEnd(event),
+    // });
 
-    this.handlePointerDown = handlePointerDown;
+    // this.handlePointerDown = handlePointerDown;
     this.setupEventListeners();
   }
 
@@ -265,7 +265,7 @@ export class EdgeWrapperElement extends HTMLElement {
 
     if (!sourceNode || !targetNode) {
       emits.error(
-        new FlowJsError(
+        new FlowKitError(
           !sourceNode && !targetNode
             ? ErrorCode.EDGE_SOURCE_TARGET_MISSING
             : !sourceNode
@@ -433,14 +433,14 @@ export class EdgeWrapperElement extends HTMLElement {
     );
   }
 
-  private onEdgeUpdate(event: MouseTouchEvent, connection: Connection) {
-    this.emit.update({ event, edge: this.edge, connection });
-  }
-
-  private onEdgeUpdateEnd(event: MouseTouchEvent) {
-    this.emit.updateEnd({ event, edge: this.edge });
-    // this.updating = false;
-  }
+  // private onEdgeUpdate(event: MouseTouchEvent, connection: Connection) {
+  //   this.emit.update({ event, edge: this.edge, connection });
+  // }
+  //
+  // private onEdgeUpdateEnd(event: MouseTouchEvent) {
+  //   this.emit.updateEnd({ event, edge: this.edge });
+  //  // this.updating = false;
+  // }
 
   // private handleEdgeUpdater(event: MouseEvent, isSourceHandle: boolean) {
   //   if (event.button !== 0) return;

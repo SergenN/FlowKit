@@ -136,7 +136,7 @@ export function useActions(
 
   const updateNodeDimensions: Actions['updateNodeDimensions'] = (updates) => {
     const flowRef =
-      state.flowRef ?? (document.querySelector('flow-js') as HTMLElement);
+      state.flowRef ?? (document.querySelector('flow-kit') as HTMLElement);
 
     if (!flowRef) {
       return;

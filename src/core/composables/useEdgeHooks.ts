@@ -1,4 +1,4 @@
-import type { FlowJsStore, EdgeMouseEvent, EdgeUpdateEvent } from '../types';
+import type { FlowKitStore, EdgeMouseEvent, EdgeUpdateEvent } from '../types';
 import { createExtendedEventHook } from '../utils';
 import type { EventHookExtended } from '../utils';
 
@@ -31,7 +31,7 @@ function createEdgeHooks(): EdgeHooks {
   };
 }
 
-export function useEdgeHooks(emits: FlowJsStore['emits']): {
+export function useEdgeHooks(emits: FlowKitStore['emits']): {
   emit: EdgeEmit;
   on: EdgeOn;
 } {

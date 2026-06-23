@@ -3,14 +3,14 @@ import type {
   EventHookExtended,
   EventHookOn,
   EventHookTrigger,
-  FlowJsError,
+  FlowKitError,
 } from '../utils';
 import type { GraphEdge } from './edge'
 import type { GraphNode } from './node'
 import type { Connection, OnConnectStartParams } from './connection'
 import type { ViewportTransform } from './zoom'
 import type { EdgeChange, NodeChange } from './changes'
-import type { FlowJsStore } from './store'
+import type { FlowKitStore } from './store'
 
 export type MouseTouchEvent = MouseEvent | TouchEvent
 
@@ -64,7 +64,7 @@ export interface FlowEvents {
     event?: MouseEvent | TouchEvent;
   } & OnConnectStartParams;
   clickConnectEnd: MouseEvent | TouchEvent | undefined;
-  init: FlowJsStore;
+  init: FlowKitStore;
   move: {
     event: D3ZoomEvent<HTMLDivElement, any> | WheelEvent;
     flowTransform: ViewportTransform;
@@ -101,7 +101,7 @@ export interface FlowEvents {
   edgeUpdateStart: EdgeMouseEvent;
   edgeUpdate: EdgeUpdateEvent;
   edgeUpdateEnd: EdgeMouseEvent;
-  error: FlowJsError;
+  error: FlowKitError;
 }
 
 export type FlowHooks = Readonly<{

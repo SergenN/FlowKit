@@ -1,4 +1,4 @@
-import type { FlowJsStore, NodeMouseEvent, NodeDragEvent } from '../types';
+import type { FlowKitStore, NodeMouseEvent, NodeDragEvent } from '../types';
 import { createExtendedEventHook } from '../utils';
 import type { EventHookExtended } from '../utils';
 
@@ -31,7 +31,7 @@ function createNodeHooks(): NodeHooks {
   };
 }
 
-export function useNodeHooks(emits: FlowJsStore['emits']): {
+export function useNodeHooks(emits: FlowKitStore['emits']): {
   emit: NodeEmit;
   on: NodeOn;
 } {

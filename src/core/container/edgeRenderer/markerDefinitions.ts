@@ -1,14 +1,14 @@
 import type { EdgeMarkerType, MarkerProps, MarkerType } from '../../types';
-import { useFlowJs } from '../../composables';
+import { useFlowKit } from '../../composables';
 import { getMarkerId } from '../../utils';
 
 export class MarkerDefinitionsElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowJs>;
+  private store!: ReturnType<typeof useFlowKit>;
   // Set by edgeRenderer before appending this element
   defsEl: SVGDefsElement | null = null;
 
   connectedCallback() {
-    this.store = useFlowJs();
+    this.store = useFlowKit();
     this.style.display = 'none';
     this.render();
   }

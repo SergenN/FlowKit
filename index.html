@@ -4,119 +4,86 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-        html, body { margin: 0; height: 100%; }
-        flow-js { display: block; width: 100%; height: 100%; }
+        html, body { margin: 0; height: 100%; font-family: sans-serif; }
+
+        #demo-selector {
+            position: fixed;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #demo-selector label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            white-space: nowrap;
+        }
+
+        #demo-selector select {
+            font-size: 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 4px 8px;
+            background: white;
+            color: #111827;
+            cursor: pointer;
+            outline: none;
+        }
+
+        #demo-selector select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+        }
+
+        #demo-frame {
+            position: fixed;
+            inset: 0;
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
     </style>
-    <title>FlowJS</title>
+    <title>FlowKit — Demo</title>
 </head>
 <body>
-<flow-js
-        id="my-flow"
-        nodes-draggable
-        elements-selectable
-        fit-view-on-init>
-</flow-js>
-<script type="module" src="./src/core/main.ts"></script>
 
-<script type="module">
-    import { MarkerType } from './src/core/types/index.ts';
+<div id="demo-selector">
+    <label for="demo-select">📦 Demo:</label>
+    <select id="demo-select">
+        <option value="./examples/basic.html">Basic Nodes</option>
+        <option value="./examples/drag-and-drop.html">Drag & Drop Nodes</option>
+        <option value="./examples/customisation.html">Custom styling</option>
+    </select>
+</div>
 
-    customElements.whenDefined('flow-js').then(() => {
-        const store = document.querySelector('#my-flow').getStore()
+<iframe id="demo-frame" src="./examples/basic.html"></iframe>
 
-        store.addNodes([
-            {
-                id: '1',
-                position: { x: 0, y: 0 },
-                data: { label: '🚀 Start' },
-                style: {
-                    background: '#6366f1',
-                    color: '#fff',
-                    border: '2px solid #4338ca',
-                    borderRadius: '8px',
-                    padding: '10px 16px',
-                    fontWeight: 'bold',
-                },
-            },
-            {
-                id: '2',
-                position: { x: 300, y: 0 },
-                data: { label: '⚙️ Process' },
-                style: {
-                    background: '#f59e0b',
-                    color: '#fff',
-                    border: '2px solid #d97706',
-                    borderRadius: '8px',
-                    padding: '10px 16px',
-                    fontWeight: 'bold',
-                },
-            },
-            {
-                id: '3',
-                position: { x: 600, y: 0 },
-                data: { label: '✅ Done' },
-                style: {
-                    background: '#10b981',
-                    color: '#fff',
-                    border: '2px solid #059669',
-                    borderRadius: '8px',
-                    padding: '10px 16px',
-                    fontWeight: 'bold',
-                },
-            },
-        ])
+<script>
+    const select = document.getElementById('demo-select');
+    const frame = document.getElementById('demo-frame');
 
-        store.onNodesInitialized(() => {
-            store.addEdges([
-                {
-                    id: 'e1-2',
-                    source: '1',
-                    target: '2',
-                    label: 'step one',
-                    animated: true,
-                    type: 'smoothstep',
-                    markerEnd: {
-                        type: MarkerType.ArrowClosed,
-                        color: '#6366f1',
-                        width: 20,
-                        height: 20,
-                        strokeWidth: 2,
-                    },
-                    style: { stroke: '#6366f1', strokeWidth: 2 },
-                    labelStyle: {
-                        background: '#6366f1',
-                        color: '#fff',
-                        borderColor: '#4338ca',
-                        fontWeight: 'bold',
-                        fontSize: '11px',
-                    },
-                },
-                {
-                    id: 'e2-3',
-                    source: '2',
-                    target: '3',
-                    label: 'step two',
-                    animated: true,
-                    type: 'smoothstep',
-                    markerEnd: {
-                        type: MarkerType.ArrowClosed,
-                        color: '#6366f1',
-                        width: 20,
-                        height: 20,
-                        strokeWidth: 2,
-                    },
-                    style: { stroke: '#f59e0b', strokeWidth: 2 },
-                    labelStyle: {
-                        background: '#f59e0b',
-                        color: '#fff',
-                        borderColor: '#d97706',
-                        fontWeight: 'bold',
-                        fontSize: '11px',
-                    },
-                },
-            ])
-        })
-    })
+    // Restore last selected demo from session
+    const saved = sessionStorage.getItem('selected-demo');
+    if (saved) {
+        select.value = saved;
+        frame.src = saved;
+    }
+
+    select.addEventListener('change', () => {
+        const url = select.value;
+        sessionStorage.setItem('selected-demo', url);
+        frame.src = url;
+    });
 </script>
 </body>
 </html>

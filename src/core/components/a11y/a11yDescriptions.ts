@@ -3,14 +3,14 @@ import {
   ARIA_LIVE_MESSAGE,
   ARIA_NODE_DESC_KEY,
 } from '../../utils';
-import { useFlowJs } from '../../composables';
+import { useFlowKit } from '../../composables';
 
 export class A11yDescriptionsElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowJs>;
+  private store!: ReturnType<typeof useFlowKit>;
   private liveRegion: HTMLDivElement | null = null;
 
   connectedCallback() {
-    this.store = useFlowJs();
+    this.store = useFlowKit();
     this.render();
   }
 

@@ -1,0 +1,15 @@
+.flow__minimap {
+    background-color: #fff;
+}
+
+.flow__minimap.pannable {
+    cursor: grab;
+}
+
+.flow__minimap.dragging {
+    cursor: grabbing;
+}
+
+.flow__minimap-mask.pannable {
+    cursor: grab;
+}

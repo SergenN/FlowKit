@@ -277,7 +277,7 @@ export function getEdgeId({
   target,
   targetHandle,
 }: Connection) {
-  return `flowjs__edge-${source}${sourceHandle ?? ''}-${target}${targetHandle ?? ''}`;
+  return `flow__edge-${source}${sourceHandle ?? ''}-${target}${targetHandle ?? ''}`;
 }
 
 export function connectionExists(edge: Edge | Connection, elements: Elements) {

@@ -1,5 +1,5 @@
 import type { D3ZoomEvent } from 'd3-zoom';
-import type { FlowJsError, KeyFilter } from '../utils';
+import type { FlowKitError, KeyFilter } from '../utils';
 import type {
   DefaultEdgeOptions,
   Edge,
@@ -31,7 +31,7 @@ import type {
 } from './hooks';
 import type { ValidConnectionFunc } from './handle';
 import type { EdgeChange, NodeChange } from './changes';
-import type { FlowJsStore } from './store';
+import type { FlowKitStore } from './store';
 
 // todo: should be object type
 export type ElementData = any;
@@ -193,9 +193,9 @@ export interface FlowEmits {
   (event: 'nodesChange', changes: NodeChange[]): void;
   (event: 'edgesChange', changes: EdgeChange[]): void;
   (event: 'nodesInitialized'): void;
-  (event: 'init', paneEvent: FlowJsStore): void;
+  (event: 'init', paneEvent: FlowKitStore): void;
   (event: 'updateNodeInternals'): void;
-  (event: 'error', error: FlowJsError): void;
+  (event: 'error', error: FlowKitError): void;
 
   (event: 'connect', connectionEvent: Connection): void;
   (

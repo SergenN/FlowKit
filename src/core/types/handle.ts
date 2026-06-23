@@ -68,7 +68,6 @@ export interface IsValidParams {
   fromType: HandleType
   isValidConnection?: ValidConnectionFunc
   doc: Document | ShadowRoot
-  lib: string
   flowId: string | null
   nodeLookup: NodeLookup
 }

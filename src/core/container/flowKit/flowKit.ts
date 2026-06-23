@@ -1,13 +1,13 @@
-import type { FlowProps, FlowJsStore } from '../../types';
+import type { FlowProps, FlowKitStore } from '../../types';
 import { setupWatchProps } from '../../composables';
 import { setupOnInitHandler } from '../../composables/useOnInitHandler';
 import { checkStylesLoaded } from '../../composables/useStylesLoadedWarning';
 import { setupResizeHandler } from '../../composables/useResizeHandler';
-import { useFlowJs } from '../../composables';
+import { useFlowKit } from '../../composables';
 import { useHooks } from '../../store';
 
 export class FlowElement extends HTMLElement {
-  private store!: FlowJsStore;
+  private store!: FlowKitStore;
   private cleanups: (() => void)[] = [];
 
   constructor() {
@@ -18,7 +18,7 @@ export class FlowElement extends HTMLElement {
     this.classList.add('flow');
 
     const props = this.getProps();
-    this.store = useFlowJs(props); // props already contains id from getProps()
+    this.store = useFlowKit(props); // props already contains id from getProps()
 
     const dispatchEvent = (name: string, data: unknown) => {
       this.dispatchEvent(
@@ -28,6 +28,13 @@ export class FlowElement extends HTMLElement {
     const cleanupHooks = useHooks(dispatchEvent, this.store.hooks);
     this.cleanups.push(cleanupHooks);
 
+    // Default onConnect: automatically add an edge when user drags a connection
+    const onConnect = (connection: any) => {
+      this.store.addEdges([connection]);
+    };
+    this.store.hooks.connect.on(onConnect);
+    this.cleanups.push(() => this.store.hooks.connect.off(onConnect));
+
     const cleanupProps = setupWatchProps(props, this.store);
     this.cleanups.push(cleanupProps);
 
@@ -36,7 +43,7 @@ export class FlowElement extends HTMLElement {
 
     checkStylesLoaded(this.store.emits);
 
-    this.store.setState({ flowRef: this as unknown as HTMLDivElement } as any);
+    this.store.flowRef = this as unknown as HTMLDivElement;
 
     if (!this.id) {
       this.id = this.store.id;
@@ -85,9 +92,9 @@ export class FlowElement extends HTMLElement {
   }
 
   // allow imperative access to the store (replaces defineExpose)
-  getStore(): FlowJsStore {
+  getStore(): FlowKitStore {
     return this.store;
   }
 }
 
-customElements.define('flow-js', FlowElement);
+customElements.define('flow-kit', FlowElement);

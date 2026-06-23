@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        html, body { margin: 0; height: 100%; }
+        flow-kit { display: block; width: 100%; height: 100%; }
+    </style>
+    <title>Basic Flow</title>
+</head>
+<body>
+<flow-kit
+        id="my-flow"
+        nodes-draggable
+        elements-selectable
+        fit-view-on-init>
+    <flow-minimap></flow-minimap>
+    <flow-background></flow-background>
+    <flow-controls></flow-controls>
+    <flow-node-toolbar id="toolbar-1"></flow-node-toolbar>
+    <flow-node-toolbar id="toolbar-2"></flow-node-toolbar>
+    <flow-node-toolbar id="toolbar-3"></flow-node-toolbar>
+</flow-kit>
+
+<script type="module" src="../src/core/main.ts"></script>
+<script type="module" src="../src/minimap/index.ts"></script>
+<script type="module" src="../src/background/index.ts"></script>
+<script type="module" src="../src/controls/index.ts"></script>
+
+<script type="module">
+    import { MarkerType } from '../src/core/types/index.ts';
+
+    customElements.whenDefined('flow-kit').then(() => {
+        const store = document.querySelector('#my-flow').getStore()
+
+        document.querySelector('#toolbar-1').setProps({ nodeId: '1', position: 'top', offset: 10 })
+        document.querySelector('#toolbar-2').setProps({ nodeId: '2', position: 'top', offset: 10 })
+        document.querySelector('#toolbar-3').setProps({ nodeId: '3', position: 'top', offset: 10 })
+
+        document.querySelector('#toolbar-1').innerHTML = `
+            <button onclick="alert('Delete node 1')">🗑 Delete</button>
+            <button onclick="alert('Edit node 1')">✏️ Edit</button>`
+        document.querySelector('#toolbar-2').innerHTML = `
+            <button onclick="alert('Delete node 2')">🗑 Delete</button>`
+        document.querySelector('#toolbar-3').innerHTML = `
+            <button onclick="alert('Delete node 3')">🗑 Delete</button>`
+
+        store.addNodes([
+            {
+                id: '1',
+                position: { x: 0, y: 0 },
+                data: { label: '🚀 Start' },
+                style: {
+                    background: '#6366f1',
+                    color: '#fff',
+                    border: '2px solid #f59e0b',
+                    borderRadius: '8px',
+                    padding: '10px 16px',
+                    fontWeight: 'bold',
+                    '--vf-handle': '#4338ca',
+                },
+            },
+            {
+                id: '2',
+                position: { x: 300, y: 0 },
+                data: { label: '⚙️ Process' },
+                style: {
+                    background: '#f59e0b',
+                    color: '#fff',
+                    border: '2px solid #d97706',
+                    borderRadius: '8px',
+                    padding: '10px 16px',
+                    fontWeight: 'bold',
+                },
+            },
+            {
+                id: '3',
+                position: { x: 600, y: 0 },
+                data: { label: '✅ Done' },
+                style: {
+                    background: '#10b981',
+                    color: '#fff',
+                    border: '2px solid #059669',
+                    borderRadius: '8px',
+                    padding: '10px 16px',
+                    fontWeight: 'bold',
+                },
+            },
+        ])
+
+        store.onNodesInitialized(() => {
+            store.addEdges([
+                {
+                    id: 'e1-2',
+                    source: '1',
+                    target: '2',
+                    label: 'step one',
+                    animated: true,
+                    type: 'smoothstep',
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        color: '#6366f1',
+                        width: 20,
+                        height: 20,
+                        strokeWidth: 2,
+                    },
+                    style: { stroke: '#6366f1', strokeWidth: 2 },
+                    labelStyle: {
+                        background: '#6366f1',
+                        color: '#fff',
+                        borderColor: '#4338ca',
+                        fontWeight: 'bold',
+                        fontSize: '11px',
+                    },
+                },
+                {
+                    id: 'e2-3',
+                    source: '2',
+                    target: '3',
+                    label: 'step two',
+                    animated: true,
+                    type: 'smoothstep',
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        color: '#6366f1',
+                        width: 20,
+                        height: 20,
+                        strokeWidth: 2,
+                    },
+                    style: { stroke: '#f59e0b', strokeWidth: 2 },
+                    labelStyle: {
+                        background: '#f59e0b',
+                        color: '#fff',
+                        borderColor: '#d97706',
+                        fontWeight: 'bold',
+                        fontSize: '11px',
+                    },
+                },
+            ])
+        })
+    })
+</script>
+</body>
+</html>

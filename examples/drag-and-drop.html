@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        html, body { margin: 0; height: 100%; }
+
+        .dndflow {
+            display: flex;
+            height: 100%;
+        }
+
+        /* Sidebar */
+        aside {
+            width: 200px;
+            min-width: 200px;
+            background: #fafafa;
+            border-right: 1px solid #e2e8f0;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        aside .description {
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 4px;
+        }
+
+        /* Draggable node previews — mirror the actual node styles */
+        aside .dnd-node {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #9ca3af;
+            background: white;
+            cursor: grab;
+            text-align: center;
+            user-select: none;
+            font-size: 13px;
+            transition: box-shadow 0.15s;
+        }
+        aside .dnd-node:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.12); }
+        aside .dnd-node:active { cursor: grabbing; }
+
+        aside .dnd-node.input  { border-color: #0041d0; color: #0041d0; }
+        aside .dnd-node.output { border-color: #ff0072; color: #ff0072; }
+
+        /* Flow canvas */
+        flow-kit {
+            display: block;
+            flex: 1;
+        }
+    </style>
+    <title>Drag & Drop</title>
+</head>
+<body>
+<div class="dndflow">
+
+    <!-- Sidebar -->
+    <aside id="dnd-sidebar">
+        <div class="description">You can drag these nodes to the pane on the right.</div>
+        <div class="dnd-node input"   draggable="true" data-node-type="input">Input Node</div>
+        <div class="dnd-node"         draggable="true" data-node-type="default">Default Node</div>
+        <div class="dnd-node output"  draggable="true" data-node-type="output">Output Node</div>
+    </aside>
+
+    <!-- Flow canvas -->
+    <flow-kit id="my-flow" nodes-draggable elements-selectable fit-view-on-init>
+        <flow-background></flow-background>
+        <flow-minimap></flow-minimap>
+        <flow-controls></flow-controls>
+    </flow-kit>
+
+</div>
+
+<script type="module" src="../src/core/main.ts"></script>
+<script type="module" src="../src/minimap/index.ts"></script>
+<script type="module" src="../src/background/index.ts"></script>
+<script type="module" src="../src/controls/index.ts"></script>
+
+<script type="module">
+    customElements.whenDefined('flow-kit').then(() => {
+        const flowEl = document.querySelector('#my-flow')
+        const store = flowEl.getStore()
+
+        let nodeId = 0
+        const getId = () => `dndnode_${nodeId++}`
+
+        // Seed with an initial input node
+        store.addNodes([{
+            id: '1',
+            type: 'input',
+            label: 'input node',
+            position: { x: 250, y: 5 },
+        }])
+
+        // Auto-add edges when user draws connections
+        store.hooks.connect.on((connection) => {
+            store.addEdges([connection])
+        })
+
+        // Sidebar drag start — store node type in dataTransfer
+        document.querySelectorAll('#dnd-sidebar .dnd-node').forEach(el => {
+            el.addEventListener('dragstart', (event) => {
+                event.dataTransfer.setData('application/flowkit', el.dataset.nodeType)
+                event.dataTransfer.effectAllowed = 'move'
+            })
+        })
+
+        // Flow canvas drag over — allow drop
+        flowEl.addEventListener('dragover', (event) => {
+            event.preventDefault()
+            event.dataTransfer.dropEffect = 'move'
+        })
+
+        // Flow canvas drop — create node at drop position
+        flowEl.addEventListener('drop', (event) => {
+            event.preventDefault()
+
+            const type = event.dataTransfer.getData('application/flowkit')
+            if (!type) return
+
+            // screenToFlowCoordinate handles the container offset + viewport transform internally
+            const position = store.screenToFlowCoordinate({
+                x: event.clientX,
+                y: event.clientY,
+            })
+
+            store.addNodes([{
+                id: getId(),
+                type,
+                position,
+                label: `${type} node`,
+            }])
+        })
+    })
+</script>
+</body>
+</html>

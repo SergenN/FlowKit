@@ -1,4 +1,4 @@
-import { useFlowJs } from './useFlowJS'
+import { useFlowKit } from './useFlowKit'
 
 /**
  * Composable for accessing the currently ongoing connection.
@@ -12,7 +12,7 @@ export function useConnection() {
     connectionEndHandle: endHandle,
     connectionStatus: status,
     connectionPosition: position,
-  } = useFlowJs();
+  } = useFlowKit();
 
   return {
     startHandle,

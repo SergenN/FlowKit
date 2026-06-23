@@ -162,7 +162,6 @@ export function isValidHandle(
     fromHandleId,
     fromType,
     doc,
-    lib,
     flowId,
     isValidConnection = alwaysValid,
   }: IsValidParams,
@@ -174,7 +173,7 @@ export function isValidHandle(
   const isTarget = fromType === 'target';
   const handleDomNode = handle
     ? doc.querySelector(
-        `.${lib}-flow__handle[data-id="${flowId}-${handle?.nodeId}-${handle?.id}-${handle?.type}"]`,
+        `.flow__handle[data-id="${flowId}-${handle?.nodeId}-${handle?.id ?? 'null'}-${handle?.type}"]`,
       )
     : null;
 
@@ -182,7 +181,7 @@ export function isValidHandle(
   const handleBelow = doc.elementFromPoint(x, y);
   // we always want to prioritize the handle below the mouse cursor over the closest distance handle,
   // because it could be that the center of another handle is closer to the mouse pointer than the handle below the cursor
-  const handleToCheck = handleBelow?.classList.contains(`${lib}-flow__handle`)
+  const handleToCheck = handleBelow?.classList.contains(`flow__handle`)
     ? handleBelow
     : handleDomNode;
 

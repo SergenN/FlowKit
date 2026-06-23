@@ -41,9 +41,9 @@ export interface UpdateNodeDimensionsParams {
 }
 
 export interface State extends Omit<FlowProps, 'id' | 'modelValue'> {
-  /** flowJs element ref */
+  /** flowKit element ref */
   flowRef: HTMLDivElement | null;
-  /** flowJs viewport element */
+  /** flowKit viewport element */
   viewportRef: HTMLDivElement | null;
 
   /** Event hooks, you can manipulate the triggers at your own peril */
@@ -357,12 +357,12 @@ export type ComputedGetters = {
   getSelectedEdges: () => GraphEdge[];
 };
 
-export type FlowJsStore = {
+export type FlowKitStore = {
   readonly id: string;
   readonly emits: FlowHooksEmit;
   readonly nodeLookup: NodeLookup;
   readonly edgeLookup: EdgeLookup;
-  readonly flowJsVersion?: string;
+  readonly flowKitVersion?: string;
   readonly dimensions: Dimensions;
   readonly viewport: ViewportTransform;
 } & FlowHooksOn &

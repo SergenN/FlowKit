@@ -27,26 +27,6 @@ const DEFAULT_PADDING = 0.1;
 const defaultEase = (t: number) =>
   ((t *= 2) <= 1 ? t * t * t : (t -= 2) * t * t + 2) / 2;
 
-function noop() {
-  console.warn('Viewport not initialized yet.');
-  return Promise.resolve(false);
-}
-
-const initialViewportHelper: ViewportHelper = {
-  zoomIn: noop,
-  zoomOut: noop,
-  zoomTo: noop,
-  fitView: noop,
-  setCenter: noop,
-  fitBounds: noop,
-  project: (position) => position,
-  screenToFlowCoordinate: (position) => position,
-  flowToScreenCoordinate: (position) => position,
-  setViewport: noop,
-  getViewport: () => ({ x: 0, y: 0, zoom: 1 }),
-  viewportInitialized: false,
-};
-
 export function useViewportHelper(state: State): ViewportHelper {
   function zoom(scale: number, transitionOptions?: TransitionOptions) {
     return new Promise<boolean>((resolve) => {
@@ -113,19 +93,18 @@ export function useViewportHelper(state: State): ViewportHelper {
     });
   }
 
-  const isInitialized = !!(
-    state.d3Zoom &&
-    state.d3Selection &&
-    state.dimensions.width &&
-    state.dimensions.height
-  );
-
-  if (!isInitialized) {
-    return initialViewportHelper;
-  }
+  const isInitialized = () =>
+    !!(
+      state.d3Zoom &&
+      state.d3Selection &&
+      state.dimensions.width &&
+      state.dimensions.height
+    );
 
   return {
-    viewportInitialized: true,
+    get viewportInitialized() {
+      return isInitialized();
+    },
 
     zoomIn: (options) => zoom(1.2, options),
 
@@ -232,40 +211,34 @@ export function useViewportHelper(state: State): ViewportHelper {
       return transformViewport(x, y, zoom, options);
     },
 
-    project: (position) =>
-      pointToRendererPoint(
+    project: (position) => {
+      if (!isInitialized()) return position;
+      return pointToRendererPoint(
         position,
         state.viewport,
         state.snapToGrid,
         state.snapGrid,
-      ),
+      );
+    },
 
     screenToFlowCoordinate: (position) => {
-      if (state.flowRef) {
-        const { x: domX, y: domY } = state.flowRef.getBoundingClientRect();
-
-        return pointToRendererPoint(
-          { x: position.x - domX, y: position.y - domY },
-          state.viewport,
-          state.snapToGrid,
-          state.snapGrid,
-        );
-      }
-
-      return { x: 0, y: 0 };
+      if (!isInitialized() || !state.flowRef) return { x: 0, y: 0 };
+      const { x: domX, y: domY } = state.flowRef.getBoundingClientRect();
+      return pointToRendererPoint(
+        { x: position.x - domX, y: position.y - domY },
+        state.viewport,
+        state.snapToGrid,
+        state.snapGrid,
+      );
     },
 
     flowToScreenCoordinate: (position) => {
-      if (state.flowRef) {
-        const { x: domX, y: domY } = state.flowRef.getBoundingClientRect();
-
-        return rendererPointToPoint(
-          { x: position.x + domX, y: position.y + domY },
-          state.viewport,
-        );
-      }
-
-      return { x: 0, y: 0 };
+      if (!isInitialized() || !state.flowRef) return { x: 0, y: 0 };
+      const { x: domX, y: domY } = state.flowRef.getBoundingClientRect();
+      return rendererPointToPoint(
+        { x: position.x - domX, y: position.y - domY },
+        state.viewport,
+      );
     },
   };
 }

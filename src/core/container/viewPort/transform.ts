@@ -1,11 +1,11 @@
-import { useFlowJs } from '../../composables';
+import { useFlowKit } from '../../composables';
 
 export class TransformElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowJs>;
+  private store!: ReturnType<typeof useFlowKit>;
   private inner: HTMLDivElement | null = null;
 
   connectedCallback() {
-    this.store = useFlowJs();
+    this.store = useFlowKit();
 
     this.inner = document.createElement('div');
     this.inner.classList.add('flow__transformationpane', 'flow__container');

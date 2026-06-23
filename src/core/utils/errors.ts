@@ -16,12 +16,12 @@ export enum ErrorCode {
   EDGE_ORPHANED = 'EDGE_ORPHANED',
 
   // deprecation errors
-  USEFLOWJS_OPTIONS = 'USEFLOWJS_OPTIONS',
+  useFlowKit_OPTIONS = 'useFlowKit_OPTIONS',
 }
 
 const messages = {
-  [ErrorCode.MISSING_STYLES]: () => `It seems that you haven't loaded the necessary styles. Please import '@flowjs/core/dist/style.css' to ensure that the graph is rendered correctly`,
-  [ErrorCode.MISSING_VIEWPORT_DIMENSIONS]: () => 'The FlowJS parent container needs a width and a height to render the graph',
+  [ErrorCode.MISSING_STYLES]: () => `It seems that you haven't loaded the necessary styles. Please import '@flowKit/core/dist/style.css' to ensure that the graph is rendered correctly`,
+  [ErrorCode.MISSING_VIEWPORT_DIMENSIONS]: () => 'The FlowKit parent container needs a width and a height to render the graph',
   [ErrorCode.NODE_INVALID]: (id?: string) => `Node is invalid\nNode: ${id}`,
   [ErrorCode.NODE_NOT_FOUND]: (id: string | null) => `Node not found\nNode: ${id}`,
   [ErrorCode.NODE_MISSING_PARENT]: (id: string, parentId: string) => `Node is missing a parent\nNode: ${id}\nParent: ${parentId}`,
@@ -37,7 +37,7 @@ const messages = {
   [ErrorCode.EDGE_NOT_FOUND]: (id: string) => `Edge not found\nEdge: ${id}`,
 
   // deprecation errors
-  [ErrorCode.USEFLOWJS_OPTIONS]: () =>
+  [ErrorCode.useFlowKit_OPTIONS]: () =>
     `The options parameter is deprecated and will be removed in the next major version. Please use the id parameter instead`,
 } as const
 
@@ -45,8 +45,8 @@ type ErrorArgs<T extends ErrorCode> = (typeof messages)[T] extends (...args: any
   ? Parameters<(typeof messages)[T]>
   : never
 
-export class FlowJsError<T extends ErrorCode = ErrorCode, Args extends ErrorArgs<T> = ErrorArgs<T>> extends Error {
-  name = 'FlowJsError'
+export class FlowKitError<T extends ErrorCode = ErrorCode, Args extends ErrorArgs<T> = ErrorArgs<T>> extends Error {
+  name = 'FlowKitError'
   code: T
   args: Args
 
@@ -58,6 +58,6 @@ export class FlowJsError<T extends ErrorCode = ErrorCode, Args extends ErrorArgs
   }
 }
 
-export function isErrorOfType<T extends ErrorCode>(error: FlowJsError, code: T): error is FlowJsError<T> {
+export function isErrorOfType<T extends ErrorCode>(error: FlowKitError, code: T): error is FlowKitError<T> {
   return error.code === code
 }
