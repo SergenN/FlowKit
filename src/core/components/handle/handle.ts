@@ -1,7 +1,7 @@
 import type { HandleProps } from '../../types';
 import { Position } from '../../types';
 import { useHandle, useFlowKit } from '../../composables';
-import { getDimensions, isDef, isMouseEvent } from '../../utils';
+import { isDef, isMouseEvent } from '../../utils';
 
 export class HandleElement extends HTMLElement {
   private store!: ReturnType<typeof useFlowKit>;
@@ -18,7 +18,6 @@ export class HandleElement extends HTMLElement {
   private _isValidConnection: HandleProps['isValidConnection'] = undefined;
   private _nodeId = '';
   private _node: any = null;
-  private _nodeEl: HTMLElement | null = null;
 
   connectedCallback() {
     this.store = useFlowKit();
@@ -26,7 +25,6 @@ export class HandleElement extends HTMLElement {
     this.classList.add('flow__handle');
     this.setupHandle();
     this.setupEventListeners();
-    this.setupHandleBounds();
     this.updateClasses();
   }
 
@@ -52,7 +50,8 @@ export class HandleElement extends HTMLElement {
     this._isValidConnection = props.isValidConnection ?? undefined;
     this._nodeId = props.nodeId;
     this._node = props.node;
-    this._nodeEl = props.nodeEl;
+    // nodeEl is no longer stored — handle bounds are computed by
+    // updateNodeDimensions in actions.ts, which already has the nodeElement.
 
     this.setupHandle();
     this.updateClasses();
@@ -71,6 +70,8 @@ export class HandleElement extends HTMLElement {
 
     const { id: flowId } = this.store;
 
+    // These data attributes are read by getHandleBounds (node.ts) and
+    // useHandle (composables) — they must stay as attributes on the element.
     this.dataset.id = `${flowId}-${this._nodeId}-${this._handleId}-${this._type}`;
     this.dataset.handleid = this._handleId ?? '';
     this.dataset.nodeid = this._nodeId;
@@ -134,7 +135,6 @@ export class HandleElement extends HTMLElement {
   private updateClasses() {
     const { noDragClassName, noPanClassName } = this.store;
 
-    // remove old position/type classes
     for (const pos of Object.values(Position)) {
       this.classList.remove(`flow__handle-${pos}`);
     }
@@ -161,42 +161,6 @@ export class HandleElement extends HTMLElement {
         ((this._connectableStart && !this.isConnecting) ||
           (this._connectableEnd && this.isConnecting)),
     );
-  }
-
-  private setupHandleBounds() {
-    const node = this._node;
-    if (!node?.dimensions.width || !node?.dimensions.height) return;
-
-    const existingBounds = node.handleBounds[this._type]?.find(
-      (b: any) => b.id === this._handleId,
-    );
-    if (existingBounds) return;
-
-    const flowRef = this.store.flowRef;
-    if (!flowRef) return;
-
-    const viewportNode = flowRef.querySelector('.flow__transformationpane');
-    if (!this._nodeEl || !viewportNode || !this._handleId) return;
-
-    const nodeBounds = this._nodeEl.getBoundingClientRect();
-    const handleBounds = this.getBoundingClientRect();
-    const style = window.getComputedStyle(viewportNode as HTMLElement);
-    const { m22: zoom } = new window.DOMMatrixReadOnly(style.transform);
-
-    const nextBounds = {
-      id: this._handleId,
-      position: this._position,
-      x: (handleBounds.left - nodeBounds.left) / zoom,
-      y: (handleBounds.top - nodeBounds.top) / zoom,
-      type: this._type,
-      nodeId: this._nodeId,
-      ...getDimensions(this),
-    };
-
-    node.handleBounds[this._type] = [
-      ...(node.handleBounds[this._type] ?? []),
-      nextBounds,
-    ];
   }
 
   private _onPointerDown = (event: MouseEvent | TouchEvent) => {

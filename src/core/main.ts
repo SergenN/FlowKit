@@ -13,7 +13,7 @@ import './container/nodeRenderer/nodeRenderer.ts';
 import './container/edgeRenderer/edgeRenderer.ts';
 import './container/edgeRenderer/markerSymbols.ts';
 import './container/edgeRenderer/markerDefinitions.ts';
-import './container/viewPort/transform.ts'
+import './container/viewPort/transform.ts';
 
 // ── Components ───────────────────────────────────────────────────────────────
 import './components/handle/handle.ts';
@@ -21,8 +21,6 @@ import './components/panel/panel.ts';
 
 // ── Nodes ────────────────────────────────────────────────────────────────────
 import './components/nodes/defaultNode.ts';
-import './components/nodes/inputNode.ts';
-import './components/nodes/outputNode.ts';
 import './components/nodes/nodeWrapper.ts';
 
 // ── Edges ────────────────────────────────────────────────────────────────────

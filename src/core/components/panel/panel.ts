@@ -3,6 +3,7 @@ import { useFlowKit } from '../../composables';
 
 export class PanelElement extends HTMLElement {
   private store!: ReturnType<typeof useFlowKit>;
+  private position = '';
 
   connectedCallback() {
     this.store = useFlowKit();
@@ -16,20 +17,16 @@ export class PanelElement extends HTMLElement {
   }
 
   setProps(props: PanelProps) {
-    this.dataset.position = props.position;
+    this.position = props.position;
     this.updateClasses();
   }
 
   private updateClasses() {
-    const position = this.dataset.position ?? '';
-    const positionClasses = position.split('-');
-
-    // remove old position classes
     for (const cls of ['top', 'bottom', 'left', 'right', 'center']) {
       this.classList.remove(cls);
     }
 
-    for (const cls of positionClasses) {
+    for (const cls of this.position.split('-')) {
       if (cls) this.classList.add(cls);
     }
   }

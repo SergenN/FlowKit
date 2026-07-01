@@ -1,29 +1,31 @@
-import { setupDrag } from '../../composables';
-import { useUpdateNodePositions } from '../../composables';
-import { useFlowKit } from '../../composables';
+import {
+  setupDrag,
+  useUpdateNodePositions,
+  useFlowKit,
+} from '../../composables';
 import { arrowKeyDiffs, getRectOfNodes } from '../../utils';
 
 export class NodesSelectionElement extends HTMLElement {
   private store!: ReturnType<typeof useFlowKit>;
-  private inner: HTMLDivElement | null = null;
   private cleanups: (() => void)[] = [];
 
   connectedCallback() {
     this.store = useFlowKit();
-
     this.classList.add('flow__nodesselection', 'flow__container');
-
     this.render();
   }
 
   disconnectedCallback() {
-    for (const cleanup of this.cleanups) {
-      cleanup();
-    }
+    this.cleanup();
+  }
+
+  private cleanup() {
+    for (const fn of this.cleanups) fn();
     this.cleanups = [];
   }
 
   render() {
+    this.cleanup();
     this.innerHTML = '';
 
     const {
@@ -34,8 +36,7 @@ export class NodesSelectionElement extends HTMLElement {
       emits,
     } = this.store;
 
-    const selectedNodes = this.store.getSelectedNodes;
-    const bbox = getRectOfNodes(selectedNodes());
+    const bbox = getRectOfNodes(this.store.getSelectedNodes());
 
     if (userSelectionActive || !bbox.width || !bbox.height) {
       return;
@@ -44,20 +45,19 @@ export class NodesSelectionElement extends HTMLElement {
     this.style.transform = `translate(${viewport.x}px,${viewport.y}px) scale(${viewport.zoom})`;
     this.classList.add(noPanClassName);
 
-    this.inner = document.createElement('div');
-    this.inner.classList.add('flow__nodesselection-rect');
-    this.inner.style.width = `${bbox.width}px`;
-    this.inner.style.height = `${bbox.height}px`;
-    this.inner.style.top = `${bbox.y}px`;
-    this.inner.style.left = `${bbox.x}px`;
+    const inner = document.createElement('div');
+    inner.classList.add('flow__nodesselection-rect');
+    inner.style.width = `${bbox.width}px`;
+    inner.style.height = `${bbox.height}px`;
+    inner.style.top = `${bbox.y}px`;
+    inner.style.left = `${bbox.x}px`;
 
     if (!disableKeyboardA11y) {
-      this.inner.tabIndex = -1;
+      inner.tabIndex = -1;
     }
 
-    // drag
     const cleanupDrag = setupDrag({
-      el: this.inner,
+      el: inner,
       onStart: (args) => {
         emits.selectionDragStart(args);
         emits.nodeDragStart(args);
@@ -71,12 +71,10 @@ export class NodesSelectionElement extends HTMLElement {
         emits.nodeDragStop(args);
       },
       onDraggingChange: (dragging) => {
-        this.inner?.classList.toggle('dragging', dragging);
+        inner.classList.toggle('dragging', dragging);
       },
     });
-    this.cleanups.push(cleanupDrag);
 
-    // context menu
     const onContextMenu = (event: MouseEvent) => {
       emits.selectionContextMenu({
         event,
@@ -84,11 +82,9 @@ export class NodesSelectionElement extends HTMLElement {
       });
     };
 
-    // keyboard
     const updatePositions = useUpdateNodePositions();
     const onKeyDown = (event: KeyboardEvent) => {
       if (disableKeyboardA11y) return;
-
       if (arrowKeyDiffs[event.key]) {
         event.preventDefault();
         updatePositions(
@@ -98,19 +94,19 @@ export class NodesSelectionElement extends HTMLElement {
       }
     };
 
-    this.inner.addEventListener('contextmenu', onContextMenu);
-    this.inner.addEventListener('keydown', onKeyDown);
+    inner.addEventListener('contextmenu', onContextMenu);
+    inner.addEventListener('keydown', onKeyDown);
 
-    this.cleanups.push(() => {
-      this.inner?.removeEventListener('contextmenu', onContextMenu);
-      this.inner?.removeEventListener('keydown', onKeyDown);
-    });
+    this.cleanups.push(
+      cleanupDrag,
+      () => inner.removeEventListener('contextmenu', onContextMenu),
+      () => inner.removeEventListener('keydown', onKeyDown),
+    );
 
-    this.appendChild(this.inner);
+    this.appendChild(inner);
 
-    // focus after mount
     if (!disableKeyboardA11y) {
-      queueMicrotask(() => this.inner?.focus({ preventScroll: true }));
+      queueMicrotask(() => inner.focus({ preventScroll: true }));
     }
   }
 }

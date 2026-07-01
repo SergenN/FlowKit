@@ -329,9 +329,11 @@ export class PaneElement extends HTMLElement {
     } = this.store;
 
     if (userSelectionActive && userSelectionRect) {
-      const userSelection = document.createElement('flow-user-selection');
-      userSelection.setAttribute('rect', JSON.stringify(userSelectionRect));
+      const userSelection = document.createElement(
+        'flow-user-selection',
+      ) as any;
       this.appendChild(userSelection);
+      userSelection.setRect(userSelectionRect);
     }
 
     if (nodesSelectionActive && getSelectedNodes.length) {

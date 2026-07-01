@@ -1,4 +1,3 @@
-import type { HandleElement } from '../../types';
 import { ConnectionLineType, ConnectionMode, Position } from '../../types';
 import { getHandlePosition, getMarkerId, oppositePosition } from '../../utils';
 import { useFlowKit } from '../../composables';
@@ -12,64 +11,89 @@ export class ConnectionLineElement extends HTMLElement {
   private store!: ReturnType<typeof useFlowKit>;
   private cleanups: (() => void)[] = [];
 
+  // Persistent SVG elements — created once, updated in place on every frame.
+  private path: SVGPathElement | null = null;
+
   connectedCallback() {
     this.store = useFlowKit();
-    this.render();
 
-    const onConnectStart = () => this.render();
+    const onConnectStart = () => {
+      // Build the SVG structure once when a connection starts.
+      this.buildSvg();
+    };
+
     const onConnectEnd = () => {
       this.innerHTML = '';
+      this.path = null;
     };
 
     this.store.hooks.connectStart.on(onConnectStart);
     this.store.hooks.connectEnd.on(onConnectEnd);
 
+    const onMouseMove = (e: MouseEvent) => {
+      if (this.store.connectionStartHandle) this.updatePath(e);
+    };
+    document.addEventListener('mousemove', onMouseMove);
+
     this.cleanups.push(
       () => this.store.hooks.connectStart.off(onConnectStart),
       () => this.store.hooks.connectEnd.off(onConnectEnd),
-    );
-
-    const onMouseMove = (e: MouseEvent) => {
-      if (this.store.connectionStartHandle) this.render(e);
-    };
-    document.addEventListener('mousemove', onMouseMove);
-    this.cleanups.push(() =>
-      document.removeEventListener('mousemove', onMouseMove),
+      () => document.removeEventListener('mousemove', onMouseMove),
     );
   }
 
   disconnectedCallback() {
     for (const cleanup of this.cleanups) cleanup();
     this.cleanups = [];
+    this.path = null;
   }
 
-  render(mouseEvent?: MouseEvent) {
+  // Build the SVG/g/path skeleton once per connection gesture and append it.
+  private buildSvg() {
     this.innerHTML = '';
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('flow__edges', 'flow__connectionline', 'flow__container');
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.classList.add('flow__connection');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.classList.add('flow__connection-path');
+
+    g.appendChild(path);
+    svg.appendChild(g);
+    this.appendChild(svg);
+
+    this.path = path;
+  }
+
+  // Update only the mutable attributes of the existing path element.
+  private updatePath(mouseEvent?: MouseEvent) {
+    if (!this.path) return;
 
     const store = this.store;
     const connectionStartHandle = store.connectionStartHandle;
     if (!connectionStartHandle) return;
 
-    const id = store.id;
-    const connectionMode = store.connectionMode;
-    const connectionEndHandle = store.connectionEndHandle;
-    const connectionPosition = store.connectionPosition;
-    const connectionLineOptions = store.connectionLineOptions;
-    const connectionStatus = store.connectionStatus;
-    const viewport = store.viewport;
-    const findNode = store.findNode;
+    const {
+      id,
+      connectionMode,
+      connectionEndHandle,
+      connectionPosition,
+      connectionLineOptions,
+      connectionStatus,
+      viewport,
+      findNode,
+    } = store;
 
     const fromNode = findNode(connectionStartHandle.nodeId);
     if (!fromNode) return;
 
-    // Mirror the original Vue component exactly:
-    // When free-dragging, use raw mouse position (connectionPosition is stale in our impl)
-    // When snapped, connectionPosition is set by updateConnection to rendererPointToPoint(handle)
     let toX: number;
     let toY: number;
 
     if (mouseEvent && !connectionEndHandle) {
-      // Free drag: compute from raw mouse
       const containerBounds = store.flowRef?.getBoundingClientRect();
       if (containerBounds) {
         toX =
@@ -83,7 +107,6 @@ export class ConnectionLineElement extends HTMLElement {
         toY = (connectionPosition.y - viewport.y) / viewport.zoom;
       }
     } else {
-      // Snapped or static: use connectionPosition (set correctly by updateConnection)
       toX = (connectionPosition.x - viewport.x) / viewport.zoom;
       toY = (connectionPosition.y - viewport.y) / viewport.zoom;
     }
@@ -107,7 +130,7 @@ export class ConnectionLineElement extends HTMLElement {
       handleBounds = [...handleBounds, ...oppositeBounds];
     }
 
-    if (!handleBounds) return;
+    if (!handleBounds.length) return;
 
     const fromHandle =
       (startHandleId
@@ -121,23 +144,6 @@ export class ConnectionLineElement extends HTMLElement {
       fromPosition,
     );
 
-    const toNode = findNode(connectionEndHandle?.nodeId) ?? null;
-    let toHandle: HandleElement | null = null;
-    if (toNode) {
-      if (connectionMode === ConnectionMode.Strict) {
-        toHandle =
-          toNode.handleBounds[
-            handleType === 'source' ? 'target' : 'source'
-          ]?.find((d) => d.id === connectionEndHandle?.id) || null;
-      } else {
-        toHandle =
-          [
-            ...(toNode.handleBounds.source ?? []),
-            ...(toNode.handleBounds.target ?? []),
-          ]?.find((d) => d.id === connectionEndHandle?.id) || null;
-      }
-    }
-
     const toPosition =
       connectionEndHandle?.position ??
       (fromPosition ? oppositePosition[fromPosition] : null);
@@ -145,7 +151,6 @@ export class ConnectionLineElement extends HTMLElement {
     if (!fromPosition || !toPosition) return;
 
     const type = connectionLineOptions.type ?? ConnectionLineType.Bezier;
-
     const pathParams = {
       sourceX: fromX,
       sourceY: fromY,
@@ -168,29 +173,30 @@ export class ConnectionLineElement extends HTMLElement {
       dAttr = `M${fromX},${fromY} ${toX},${toY}`;
     }
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.classList.add('flow__edges', 'flow__connectionline', 'flow__container');
-
-    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    g.classList.add('flow__connection');
-
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const path = this.path;
     path.setAttribute('d', dAttr);
-    path.classList.add('flow__connection-path');
-    if (connectionLineOptions.class)
-      path.classList.add(connectionLineOptions.class);
+
+    // Sync mutable classes — connection status and user-provided class.
+    const statusClasses = ['valid', 'invalid', 'connecting'];
+    for (const cls of statusClasses) path.classList.remove(cls);
     if (connectionStatus) path.classList.add(connectionStatus);
+
+    if (connectionLineOptions.class) {
+      path.classList.add(connectionLineOptions.class);
+    }
+
+    // Sync markers.
+    if (markerEnd) path.setAttribute('marker-end', markerEnd);
+    else path.removeAttribute('marker-end');
+    if (markerStart) path.setAttribute('marker-start', markerStart);
+    else path.removeAttribute('marker-start');
+
+    // Sync styles.
     if (connectionLineOptions.style) {
       for (const [key, value] of Object.entries(connectionLineOptions.style)) {
         (path.style as any)[key] = value;
       }
     }
-    if (markerEnd) path.setAttribute('marker-end', markerEnd);
-    if (markerStart) path.setAttribute('marker-start', markerStart);
-
-    g.appendChild(path);
-    svg.appendChild(g);
-    this.appendChild(svg);
   }
 }
 

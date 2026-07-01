@@ -90,12 +90,12 @@
         let nodeId = 0
         const getId = () => `dndnode_${nodeId++}`
 
-        // Seed with an initial input node
+        // Seed with an initial input node — label lives inside data
         store.addNodes([{
             id: '1',
             type: 'input',
-            label: 'input node',
             position: { x: 250, y: 5 },
+            data: { label: 'input node' },
         }])
 
         // Auto-add edges when user draws connections
@@ -124,7 +124,7 @@
             const type = event.dataTransfer.getData('application/flowkit')
             if (!type) return
 
-            // screenToFlowCoordinate handles the container offset + viewport transform internally
+            // screenToFlowCoordinate handles container offset + viewport transform
             const position = store.screenToFlowCoordinate({
                 x: event.clientX,
                 y: event.clientY,
@@ -134,7 +134,7 @@
                 id: getId(),
                 type,
                 position,
-                label: `${type} node`,
+                data: { label: `${type} node` },
             }])
         })
     })

@@ -71,7 +71,31 @@ export class Storage {
       flowKitVersion: '1.0.0',
       id,
       $destroy: () => {
+        // Remove from the singleton registry first so no new lookups resolve
+        // to this store while teardown is in progress.
         this.remove(id);
+
+        // Clear all hook listeners and detach emitters so closures over
+        // state/nodeLookup/edgeLookup can be garbage-collected.
+        for (const hook of Object.values(state.hooks)) {
+          const listeners = hook.listeners as ReadonlySet<(param: any) => void>;
+          const off = hook.off as (fn: (param: any) => void) => void;
+          listeners.forEach((fn) => off(fn));
+          hook.removeEmitter();
+          hook.removeHasEmitListeners();
+        }
+
+        // Release graph data so the arrays and maps can be GC'd.
+        state.nodes = [];
+        state.edges = [];
+        nodeLookup.clear();
+        edgeLookup.clear();
+        state.connectionLookup.clear();
+
+        // Drop DOM element references so elements aren't kept alive
+        // by the detached store object.
+        state.flowRef = null;
+        state.viewportRef = null;
       },
     };
 

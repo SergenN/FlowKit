@@ -58,13 +58,13 @@
         const store = document.querySelector('#my-flow').getStore()
 
         store.setMinZoom(0.2)
-        store.setMaxZoom(4)
+        store.setMaxZoom(2)
 
         const nodes = [
             { id: '1', type: 'input',   data: { label: 'Node 1' }, position: { x: 250, y: 5   }, class: 'light' },
             { id: '2', type: 'default', data: { label: 'Node 2' }, position: { x: 100, y: 100 }, class: 'light' },
             { id: '3', type: 'default', data: { label: 'Node 3' }, position: { x: 400, y: 100 }, class: 'light' },
-            { id: '4', type: 'default', data: { label: 'Node 4'}, position: { x: 400, y: 200 }, class: 'light' },
+            { id: '4', type: 'default', data: { label: 'Node 4' }, position: { x: 400, y: 200 }, class: 'light' },
         ]
 
         const edges = [
@@ -78,17 +78,17 @@
             store.addEdges(edges)
         })
 
-        // onConnect — auto-add edges when user draws connections
+        // Auto-add edges when user draws connections
         store.hooks.connect.on((connection) => {
             store.addEdges([connection])
         })
 
-        // reset viewport
+        // Reset viewport
         document.getElementById('btn-reset').addEventListener('click', () => {
             store.setViewport({ x: 0, y: 0, zoom: 1 })
         })
 
-        // randomise positions
+        // Randomise positions
         document.getElementById('btn-pos').addEventListener('click', () => {
             const changes = store.nodes.map(node => ({
                 id: node.id,
@@ -101,27 +101,16 @@
             store.applyNodeChanges(changes)
         })
 
-        // toggle light/dark class
+        // Toggle light/dark class — update via store so state stays in sync
         document.getElementById('btn-class').addEventListener('click', () => {
-            const changes = store.nodes.map(node => ({
-                id: node.id,
-                type: 'select', // trigger re-render by touching selection
-            }))
             store.nodes.forEach(node => {
-                node.class = node.class === 'light' ? 'dark' : 'light'
-            })
-            // force node wrappers to re-apply class
-            document.querySelectorAll('.flow__node').forEach(el => {
-                const id = el.dataset.id
-                const node = store.findNode(id)
-                if (node) {
-                    el.classList.remove('light', 'dark')
-                    el.classList.add(node.class)
-                }
+                store.updateNode(node.id, {
+                    class: node.class === 'light' ? 'dark' : 'light',
+                })
             })
         })
 
-        // log toObject
+        // Log graph snapshot
         document.getElementById('btn-log').addEventListener('click', () => {
             console.log(store.toObject())
         })

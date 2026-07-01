@@ -21,7 +21,6 @@ import type { MouseTouchEvent } from '../../types';
 export class NodeWrapperElement extends HTMLElement {
   private store!: ReturnType<typeof useFlowKit>;
   private nodeId!: string;
-  private resizeObserver!: ResizeObserver;
   private cleanups: (() => void)[] = [];
   private dragging = false;
   private emit!: ReturnType<typeof useNodeHooks>['emit'];
@@ -38,10 +37,6 @@ export class NodeWrapperElement extends HTMLElement {
       cleanup();
     }
     this.cleanups = [];
-  }
-
-  setResizeObserver(resizeObserver: ResizeObserver) {
-    this.resizeObserver = resizeObserver;
   }
 
   private get node() {

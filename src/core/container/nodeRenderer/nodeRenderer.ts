@@ -10,7 +10,7 @@ export class NodeRendererElement extends HTMLElement {
     this.classList.add('flow__nodes', 'flow__container');
 
     this.render();
-    this.checkNodesInitialized();
+    this.watchNodesInitialized();
 
     const onNodesChange = (changes: any[]) => {
       const hasStructural = changes.some(
@@ -29,17 +29,35 @@ export class NodeRendererElement extends HTMLElement {
     this.cleanups = [];
   }
 
-  private checkNodesInitialized() {
+  // Previously used setInterval to poll getNodesInitialized() every 50ms.
+  // Now we subscribe to nodesChange: every time a node's dimensions are measured
+  // (type === 'dimensions'), we re-check. This fires at exactly the right moment
+  // with no timer overhead.
+  private watchNodesInitialized() {
     const { emits, getNodes } = this.store;
+    let fired = false;
 
-    const interval = setInterval(() => {
+    // Check immediately — nodes may already be initialized if re-mounting.
+    if (getNodesInitialized()) {
+      queueMicrotask(() => emits.nodesInitialized(getNodes()));
+      return;
+    }
+
+    const onNodesChange = (changes: any[]) => {
+      if (fired) return;
+
+      const hasDimensionChange = changes.some((c) => c.type === 'dimensions');
+      if (!hasDimensionChange) return;
+
       if (getNodesInitialized()) {
-        clearInterval(interval);
+        fired = true;
+        this.store.hooks.nodesChange.off(onNodesChange);
         queueMicrotask(() => emits.nodesInitialized(getNodes()));
       }
-    }, 50);
+    };
 
-    this.cleanups.push(() => clearInterval(interval));
+    this.store.onNodesChange(onNodesChange);
+    this.cleanups.push(() => this.store.hooks.nodesChange.off(onNodesChange));
   }
 
   render() {

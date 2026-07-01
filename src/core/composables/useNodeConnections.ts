@@ -34,7 +34,8 @@ export function setupNodeConnections(
   onChange: (connections: NodeConnection[]) => void,
 ): () => void {
   const { handleType, handleId, nodeId, onConnect, onDisconnect } = params;
-  const { connectionLookup } = useFlowKit();
+  const store = useFlowKit();
+  const { connectionLookup } = store;
 
   let prevConnections: Map<string, NodeConnection> | null = null;
 
@@ -45,7 +46,7 @@ export function setupNodeConnections(
 
   const key = `${nodeId}${handleSuffix}`;
 
-  const interval = setInterval(() => {
+  const checkConnections = () => {
     const nextConnections = connectionLookup.get(key);
 
     if (areConnectionMapsEqual(prevConnections ?? undefined, nextConnections)) {
@@ -62,7 +63,15 @@ export function setupNodeConnections(
 
     prevConnections = currentConnections;
     onChange(Array.from(currentConnections.values()));
-  }, 50);
+  };
 
-  return () => clearInterval(interval);
+  // Run immediately to capture the current state.
+  checkConnections();
+
+  // Re-check whenever edges change — the connectionLookup is rebuilt on every
+  // edge add/remove/update, so this is the correct reactive signal.
+  const onEdgesChange = () => checkConnections();
+  store.onEdgesChange(onEdgesChange);
+
+  return () => store.hooks.edgesChange.off(onEdgesChange);
 }
