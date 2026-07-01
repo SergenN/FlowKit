@@ -1,13 +1,13 @@
-import type { FlowProps, FlowItStore } from '../../types';
+import type { FlowProps, FlowKitStore } from '../../types';
 import { setupWatchProps } from '../../composables';
 import { setupOnInitHandler } from '../../composables/useOnInitHandler';
 import { checkStylesLoaded } from '../../composables/useStylesLoadedWarning';
 import { setupResizeHandler } from '../../composables/useResizeHandler';
-import { useFlowIt } from '../../composables';
+import { useFlowKit } from '../../composables';
 import { useHooks } from '../../store';
 
 export class FlowElement extends HTMLElement {
-  private store!: FlowItStore;
+  private store!: FlowKitStore;
   private cleanups: (() => void)[] = [];
 
   constructor() {
@@ -18,7 +18,7 @@ export class FlowElement extends HTMLElement {
     this.classList.add('flow');
 
     const props = this.getProps();
-    this.store = useFlowIt(props); // props already contains id from getProps()
+    this.store = useFlowKit(props); // props already contains id from getProps()
 
     const dispatchEvent = (name: string, data: unknown) => {
       this.dispatchEvent(
@@ -92,9 +92,9 @@ export class FlowElement extends HTMLElement {
   }
 
   // allow imperative access to the store (replaces defineExpose)
-  getStore(): FlowItStore {
+  getStore(): FlowKitStore {
     return this.store;
   }
 }
 
-customElements.define('flow-it', FlowElement);
+customElements.define('flow-kit', FlowElement);

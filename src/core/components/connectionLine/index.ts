@@ -1,6 +1,6 @@
 import { ConnectionLineType, ConnectionMode, Position } from '../../types';
 import { getHandlePosition, getMarkerId, oppositePosition } from '../../utils';
-import { useFlowIt } from '../../composables';
+import { useFlowKit } from '../../composables';
 import {
   getBezierPath,
   getSimpleBezierPath,
@@ -8,14 +8,14 @@ import {
 } from '../edges/utils';
 
 export class ConnectionLineElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowIt>;
+  private store!: ReturnType<typeof useFlowKit>;
   private cleanups: (() => void)[] = [];
 
   // Persistent SVG elements — created once, updated in place on every frame.
   private path: SVGPathElement | null = null;
 
   connectedCallback() {
-    this.store = useFlowIt();
+    this.store = useFlowKit();
 
     const onConnectStart = () => {
       // Build the SVG structure once when a connection starts.

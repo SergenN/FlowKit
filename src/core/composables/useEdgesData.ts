@@ -1,5 +1,5 @@
 import type { Edge, GraphEdge } from '../types';
-import { useFlowIt } from './useFlowIt';
+import { useFlowKit } from './useFlowKit';
 
 interface EdgeData<EdgeType extends Edge = GraphEdge> {
   id: string;
@@ -18,7 +18,7 @@ export function useEdgesData<EdgeType extends Edge = GraphEdge>(
   guard: (edge: Edge) => edge is EdgeType,
 ): EdgeData<EdgeType>[];
 export function useEdgesData(_edgeIds: any): any {
-  const { findEdge } = useFlowIt();
+  const { findEdge } = useFlowKit();
 
   const edgeIds = _edgeIds;
 

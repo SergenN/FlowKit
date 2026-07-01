@@ -1,12 +1,12 @@
-import { useFlowIt } from '../../composables';
+import { useFlowKit } from '../../composables';
 import { getNodesInitialized } from '../../composables/useNodesInitialized';
 
 export class NodeRendererElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowIt>;
+  private store!: ReturnType<typeof useFlowKit>;
   private cleanups: (() => void)[] = [];
 
   connectedCallback() {
-    this.store = useFlowIt();
+    this.store = useFlowKit();
     this.classList.add('flow__nodes', 'flow__container');
 
     this.render();

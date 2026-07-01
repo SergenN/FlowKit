@@ -1,5 +1,5 @@
 /**
- * FlowIt — entry point
+ * FlowKit — entry point
  * Imports all custom element definitions (side effects) so every
  * customElements.define() call runs before the page uses them.
  */
@@ -7,7 +7,7 @@ import './style.css';
 import './theme-default.css';
 
 // ── Container ────────────────────────────────────────────────────────────────
-import './container/flowIt/flowIt.ts';
+import './container/flowKit/flowKit.ts';
 import './container/viewPort/viewport.ts';
 import './container/nodeRenderer/nodeRenderer.ts';
 import './container/edgeRenderer/edgeRenderer.ts';
@@ -43,7 +43,7 @@ import './components/userSelection/userSelection.ts';
 import '../nodeToolbar/nodeToolbar';
 
 // ── Public API (re-exports for consumers who import from this file) ───────────
-export { FlowElement as FlowIt } from './container/flowIt/flowIt.ts';
+export { FlowElement as FlowKit } from './container/flowKit/flowKit.ts';
 export { HandleElement as Handle } from './components/handle/handle.ts';
 export { PanelElement as Panel } from './components/panel/panel.ts';
 export { StraightEdgeElement as StraightEdge } from './components/edges/straightEdge.ts';
@@ -91,10 +91,10 @@ export {
   defaultNodeTypes,
 } from './utils/defaultNodeEdges.ts';
 export {
-  FlowSymbol as FlowItInjection,
+  FlowSymbol as FlowKitInjection,
   NodeId as NodeIdInjection,
 } from './context';
-export { useFlowIt as useFlowIt } from './composables/useFlowIt';
+export { useFlowKit as useFlowKit } from './composables/useFlowKit';
 export { useHandle } from './composables/useHandle';
 export { useNode } from './composables/useNode';
 export { useEdge } from './composables/useEdge';
@@ -104,7 +104,7 @@ export { getNodesData as useNodesData } from './composables/useNodesData';
 export { useEdgesData } from './composables/useEdgesData.ts';
 export { getNodesInitialized as useNodesInitialized } from './composables/useNodesInitialized';
 export { setupKeyPress as useKeyPress } from './composables/useKeyPress';
-export { FlowItError, ErrorCode, isErrorOfType } from './utils/errors';
+export { FlowKitError, ErrorCode, isErrorOfType } from './utils/errors';
 export { NodeToolbarElement as NodeToolbar } from '../nodeToolbar/nodeToolbar';
 
 export * from '../nodeToolbar/types.ts';

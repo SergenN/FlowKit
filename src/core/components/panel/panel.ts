@@ -1,12 +1,12 @@
 import type { PanelProps } from '../../types';
-import { useFlowIt } from '../../composables';
+import { useFlowKit } from '../../composables';
 
 export class PanelElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowIt>;
+  private store!: ReturnType<typeof useFlowKit>;
   private position = '';
 
   connectedCallback() {
-    this.store = useFlowIt();
+    this.store = useFlowKit();
 
     this.classList.add('flow__panel');
     this.updateClasses();

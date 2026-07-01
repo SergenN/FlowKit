@@ -1,10 +1,10 @@
 import { GraphNode, Position, Rect, ViewportTransform } from '../core/types';
 import { getRectOfNodes } from '../core/utils';
-import { useFlowIt } from '../core/composables';
+import { useFlowKit } from '../core/composables';
 import type { Align, NodeToolbarProps } from './types';
 
 export class NodeToolbarElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowIt>;
+  private store!: ReturnType<typeof useFlowKit>;
   private cleanups: (() => void)[] = [];
   private wrapperEl: HTMLElement | null = null;
 
@@ -25,7 +25,7 @@ export class NodeToolbarElement extends HTMLElement {
   }
 
   connectedCallback() {
-    this.store = useFlowIt();
+    this.store = useFlowKit();
     this.style.display = 'none'; // host is just a logical container
 
     this.setupWrapper();

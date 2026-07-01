@@ -1,6 +1,6 @@
 import type { ElementData } from '../types';
-import { ErrorCode, FlowItError } from '../utils';
-import { useFlowIt } from './useFlowIt';
+import { ErrorCode, FlowKitError } from '../utils';
+import { useFlowKit } from './useFlowKit';
 
 /**
  * Composable that provides access to an edge object and it's dom element
@@ -18,12 +18,12 @@ export function useEdge<Data = ElementData>(
   id: string,
   edgeEl?: HTMLElement | SVGElement | null,
 ) {
-  const { findEdge, emits } = useFlowIt();
+  const { findEdge, emits } = useFlowKit();
 
   const edge = findEdge<Data>(id);
 
   if (!edge) {
-    emits.error(new FlowItError(ErrorCode.EDGE_NOT_FOUND, id));
+    emits.error(new FlowKitError(ErrorCode.EDGE_NOT_FOUND, id));
   }
 
   return {

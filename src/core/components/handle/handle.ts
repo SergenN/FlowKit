@@ -1,10 +1,10 @@
 import type { HandleProps } from '../../types';
 import { Position } from '../../types';
-import { useHandle, useFlowIt } from '../../composables';
+import { useHandle, useFlowKit } from '../../composables';
 import { isDef, isMouseEvent } from '../../utils';
 
 export class HandleElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowIt>;
+  private store!: ReturnType<typeof useFlowKit>;
   private handlePointerDown!: (event: MouseEvent | TouchEvent) => void;
   private handleClick!: (event: MouseEvent) => void;
 
@@ -20,7 +20,7 @@ export class HandleElement extends HTMLElement {
   private _node: any = null;
 
   connectedCallback() {
-    this.store = useFlowIt();
+    this.store = useFlowKit();
 
     this.classList.add('flow__handle');
     this.setupHandle();

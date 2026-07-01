@@ -5,7 +5,7 @@ import {
   snapPosition,
 } from '../utils';
 import type { MouseTouchEvent } from '../types';
-import { useFlowIt } from './useFlowIt';
+import { useFlowKit } from './useFlowKit';
 import type { UseDragEvent } from './useDrag';
 
 /**
@@ -14,7 +14,7 @@ import type { UseDragEvent } from './useDrag';
  * @internal
  */
 export function useGetPointerPosition() {
-  const store = useFlowIt();
+  const store = useFlowKit();
 
   // returns the pointer position projected to the VF coordinate system
   return (event: UseDragEvent | MouseTouchEvent) => {

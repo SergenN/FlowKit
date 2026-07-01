@@ -24,7 +24,7 @@ import {
   resetRecentHandle,
 } from '../utils';
 import { Position } from '../types';
-import { useFlowIt } from './useFlowIt';
+import { useFlowKit } from './useFlowKit';
 
 export interface UseHandleProps {
   handleId: string | null;
@@ -75,8 +75,8 @@ export function useHandle({
     nodes,
     isValidConnection: isValidConnectionProp,
     nodeLookup,
-  } = useFlowIt();
-  const store = useFlowIt();
+  } = useFlowKit();
+  const store = useFlowKit();
 
   let connection: Connection | null = null;
   let isValid: boolean | null = false;

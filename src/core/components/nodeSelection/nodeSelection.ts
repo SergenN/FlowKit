@@ -1,16 +1,16 @@
 import {
   setupDrag,
   useUpdateNodePositions,
-  useFlowIt,
+  useFlowKit,
 } from '../../composables';
 import { arrowKeyDiffs, getRectOfNodes } from '../../utils';
 
 export class NodesSelectionElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowIt>;
+  private store!: ReturnType<typeof useFlowKit>;
   private cleanups: (() => void)[] = [];
 
   connectedCallback() {
-    this.store = useFlowIt();
+    this.store = useFlowKit();
     this.classList.add('flow__nodesselection', 'flow__container');
     this.render();
   }

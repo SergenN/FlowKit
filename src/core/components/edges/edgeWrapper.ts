@@ -1,10 +1,10 @@
 // import type { Connection, HandleType, MouseTouchEvent } from '../../types';
 import { ConnectionMode, Position } from '../../types';
-import { useEdgeHooks, useFlowIt } from '../../composables';
+import { useEdgeHooks, useFlowKit } from '../../composables';
 import {
   ARIA_EDGE_DESC_KEY,
   ErrorCode,
-  FlowItError,
+  FlowKitError,
   elementSelectionKeys,
   getEdgeHandle,
   getHandlePosition,
@@ -18,7 +18,7 @@ import {
 } from './utils';
 
 export class EdgeWrapperElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowIt>;
+  private store!: ReturnType<typeof useFlowKit>;
   private edgeId!: string;
   private cleanups: (() => void)[] = [];
 
@@ -39,7 +39,7 @@ export class EdgeWrapperElement extends HTMLElement {
   private labelFo: SVGForeignObjectElement | null = null;
 
   connectedCallback() {
-    this.store = useFlowIt();
+    this.store = useFlowKit();
     this.edgeId = this.getAttribute('id') ?? '';
     this.style.display = 'none';
 
@@ -265,7 +265,7 @@ export class EdgeWrapperElement extends HTMLElement {
 
     if (!sourceNode || !targetNode) {
       emits.error(
-        new FlowItError(
+        new FlowKitError(
           !sourceNode && !targetNode
             ? ErrorCode.EDGE_SOURCE_TARGET_MISSING
             : !sourceNode

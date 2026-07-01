@@ -1,5 +1,5 @@
 import type { GraphNode, Node } from '../types';
-import { useFlowIt } from './useFlowIt';
+import { useFlowKit } from './useFlowKit';
 
 interface NodeData<NodeType extends Node = GraphNode> {
   id: string;
@@ -18,7 +18,7 @@ export function getNodesData<NodeType extends Node = GraphNode>(
   guard: (node: Node) => node is NodeType,
 ): NodeData<NodeType>[];
 export function getNodesData(_nodeIds: any): any {
-  const { findNode } = useFlowIt();
+  const { findNode } = useFlowKit();
 
   const nodeIds = _nodeIds;
 

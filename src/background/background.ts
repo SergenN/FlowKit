@@ -1,10 +1,10 @@
-import { useFlowIt } from '../core/composables';
+import { useFlowKit } from '../core/composables';
 import { DefaultBgColors } from './patterns.ts';
 import { BackgroundVariant } from './types.ts';
 import type { BackgroundProps } from './types.ts';
 
 export class BackgroundElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowIt>;
+  private store!: ReturnType<typeof useFlowKit>;
   private cleanups: (() => void)[] = [];
   private svgEl: SVGSVGElement | null = null;
 
@@ -88,7 +88,7 @@ export class BackgroundElement extends HTMLElement {
   }
 
   connectedCallback() {
-    this.store = useFlowIt();
+    this.store = useFlowKit();
     this.readAttributes();
     this.render();
 

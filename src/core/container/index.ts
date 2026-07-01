@@ -1,4 +1,4 @@
-export { FlowElement as FlowIt } from './flowIt/flowIt';
+export { FlowElement as FlowKit } from './flowKit/flowKit';
 export { EdgeRendererElement as EdgeRenderer } from './edgeRenderer/edgeRenderer';
 export { MarkerSymbolElement as Marker } from './edgeRenderer/markerSymbols';
 export { MarkerDefinitionsElement as MarkerDefinitions } from './edgeRenderer/markerDefinitions';

@@ -8,5 +8,5 @@ export * from './useNode';
 export * from './useNodeHooks';
 export * from './useUpdateNodePositions';
 export * from './useViewportHelper';
-export * from './useFlowIt';
+export * from './useFlowKit';
 export * from './useWatchProps';

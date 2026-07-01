@@ -1,11 +1,11 @@
-import { useFlowIt } from '../../composables';
+import { useFlowKit } from '../../composables';
 
 export class EdgeRendererElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowIt>;
+  private store!: ReturnType<typeof useFlowKit>;
   private cleanups: (() => void)[] = [];
 
   connectedCallback() {
-    this.store = useFlowIt();
+    this.store = useFlowKit();
     this.render();
 
     const onEdgesChange = () => this.render();

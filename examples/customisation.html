@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
         html, body { margin: 0; height: 100%; }
-        flow-it { display: block; width: 100%; height: 100%; }
+        flow-kit { display: block; width: 100%; height: 100%; }
     </style>
     <title>Customisation</title>
 </head>
 <body>
-<flow-it
+<flow-kit
         id="my-flow"
         nodes-draggable
         elements-selectable
@@ -21,7 +21,7 @@
     <flow-node-toolbar id="toolbar-1"></flow-node-toolbar>
     <flow-node-toolbar id="toolbar-2"></flow-node-toolbar>
     <flow-node-toolbar id="toolbar-3"></flow-node-toolbar>
-</flow-it>
+</flow-kit>
 
 <script type="module" src="../src/core/main.ts"></script>
 <script type="module" src="../src/minimap/index.ts"></script>
@@ -31,7 +31,7 @@
 <script type="module">
     import { MarkerType } from '../src/core/types/index.ts';
 
-    customElements.whenDefined('flow-it').then(() => {
+    customElements.whenDefined('flow-kit').then(() => {
         const store = document.querySelector('#my-flow').getStore()
 
         document.querySelector('#toolbar-1').setProps({ nodeId: '1', position: 'top', offset: 10 })
