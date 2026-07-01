@@ -7,7 +7,7 @@ import './style.css';
 import './theme-default.css';
 
 // ── Container ────────────────────────────────────────────────────────────────
-import './container/FlowIt/FlowIt.ts';
+import './container/flowIt/flowIt.ts';
 import './container/viewPort/viewport.ts';
 import './container/nodeRenderer/nodeRenderer.ts';
 import './container/edgeRenderer/edgeRenderer.ts';
@@ -43,7 +43,7 @@ import './components/userSelection/userSelection.ts';
 import '../nodeToolbar/nodeToolbar';
 
 // ── Public API (re-exports for consumers who import from this file) ───────────
-export { FlowElement as FlowIt } from './container/FlowIt/FlowIt.ts';
+export { FlowElement as FlowIt } from './container/flowIt/flowIt.ts';
 export { HandleElement as Handle } from './components/handle/handle.ts';
 export { PanelElement as Panel } from './components/panel/panel.ts';
 export { StraightEdgeElement as StraightEdge } from './components/edges/straightEdge.ts';
