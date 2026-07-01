@@ -1,6 +1,6 @@
 import type { HandleType, NodeConnection } from '../types';
 import { areConnectionMapsEqual, handleConnectionChange } from '../utils';
-import { useFlowKit } from './useFlowKit';
+import { useFlowIt } from './useFlowIt';
 
 export interface UseNodeConnectionsParams {
   handleType?: HandleType | null;
@@ -14,7 +14,7 @@ export function getNodeConnections(
   params: UseNodeConnectionsParams,
 ): NodeConnection[] {
   const { handleType, handleId, nodeId } = params;
-  const { connectionLookup } = useFlowKit();
+  const { connectionLookup } = useFlowIt();
 
   let handleSuffix = '';
   if (handleType) {
@@ -34,7 +34,7 @@ export function setupNodeConnections(
   onChange: (connections: NodeConnection[]) => void,
 ): () => void {
   const { handleType, handleId, nodeId, onConnect, onDisconnect } = params;
-  const store = useFlowKit();
+  const store = useFlowIt();
   const { connectionLookup } = store;
 
   let prevConnections: Map<string, NodeConnection> | null = null;

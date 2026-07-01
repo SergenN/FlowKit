@@ -1,7 +1,7 @@
-import { useFlowKit } from './useFlowKit';
+import { useFlowIt } from './useFlowIt';
 
 export function setupOnInitHandler(): () => void {
-  const store = useFlowKit();
+  const store = useFlowIt();
 
   // d3Zoom and d3Selection are set synchronously when flow-viewport connects.
   // Dimensions are set by the ResizeObserver inside setupResizeHandler on the viewport.

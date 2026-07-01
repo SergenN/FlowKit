@@ -9,7 +9,7 @@ import type {
   State,
   XYPosition,
 } from '../types';
-import { ErrorCode, FlowKitError, clampPosition, isParentSelected } from '.';
+import { ErrorCode, FlowItError, clampPosition, isParentSelected } from '.';
 
 export function hasSelector(
   target: Element,
@@ -169,7 +169,7 @@ export function getExtent<T extends NodeDragItem | GraphNode>(
         currentExtent = parentExtent;
       }
     } else {
-      triggerError(new FlowKitError(ErrorCode.NODE_EXTENT_INVALID, item.id));
+      triggerError(new FlowItError(ErrorCode.NODE_EXTENT_INVALID, item.id));
 
       currentExtent = extent;
     }

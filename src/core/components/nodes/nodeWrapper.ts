@@ -1,7 +1,7 @@
 import {
   ARIA_NODE_DESC_KEY,
   ErrorCode,
-  FlowKitError,
+  FlowItError,
   arrowKeyDiffs,
   calcNextPosition,
   elementSelectionKeys,
@@ -12,21 +12,21 @@ import {
 import {
   isInputDOMNode,
   setupDrag,
-  useFlowKit,
+  useFlowIt,
   useNodeHooks,
   useUpdateNodePositions,
 } from '../../composables';
 import type { MouseTouchEvent } from '../../types';
 
 export class NodeWrapperElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowKit>;
+  private store!: ReturnType<typeof useFlowIt>;
   private nodeId!: string;
   private cleanups: (() => void)[] = [];
   private dragging = false;
   private emit!: ReturnType<typeof useNodeHooks>['emit'];
 
   connectedCallback() {
-    this.store = useFlowKit();
+    this.store = useFlowIt();
     this.nodeId = this.getAttribute('id') ?? '';
 
     this.setup();
@@ -436,7 +436,7 @@ export class NodeWrapperElement extends HTMLElement {
     let nodeCmp = nodeTypes.default;
 
     if (!nodeCmp) {
-      emits.error(new FlowKitError(ErrorCode.NODE_TYPE_MISSING, nodeType));
+      emits.error(new FlowItError(ErrorCode.NODE_TYPE_MISSING, nodeType));
       nodeCmp = nodeTypes.default;
     }
 

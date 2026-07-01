@@ -10,11 +10,11 @@ import type {
   NodeConnection,
   State,
   ValidConnectionFunc,
-  FlowKitStore,
+  FlowItStore,
 } from '../types';
 import {
   ErrorCode,
-  FlowKitError,
+  FlowItError,
   connectionExists,
   getEdgeId,
   isEdge,
@@ -37,7 +37,7 @@ export function addEdgeToStore(
 ): GraphEdge | false {
   if (!edgeParams || !edgeParams.source || !edgeParams.target) {
     triggerError(
-      new FlowKitError(
+      new FlowItError(
         ErrorCode.EDGE_INVALID,
         (edgeParams as undefined | Edge)?.id ?? `[ID UNKNOWN]`,
       ),
@@ -72,12 +72,12 @@ export function updateEdgeAction(
   triggerError: State['hooks']['error']['trigger'],
 ) {
   if (!newConnection.source || !newConnection.target) {
-    triggerError(new FlowKitError(ErrorCode.EDGE_INVALID, edge.id));
+    triggerError(new FlowItError(ErrorCode.EDGE_INVALID, edge.id));
     return false;
   }
 
   if (!prevEdge) {
-    triggerError(new FlowKitError(ErrorCode.EDGE_NOT_FOUND, edge.id));
+    triggerError(new FlowItError(ErrorCode.EDGE_NOT_FOUND, edge.id));
     return false;
   }
 
@@ -106,7 +106,7 @@ export function createGraphNodes(
 
     if (!isNode(node)) {
       triggerError(
-        new FlowKitError(
+        new FlowItError(
           ErrorCode.NODE_INVALID,
           (node as undefined | Record<any, any>)?.id,
         ) || `[ID UNKNOWN|INDEX ${i}]`,
@@ -129,7 +129,7 @@ export function createGraphNodes(
 
     if (node.parentId && !parentNode) {
       triggerError(
-        new FlowKitError(ErrorCode.NODE_MISSING_PARENT, node.id, node.parentId),
+        new FlowItError(ErrorCode.NODE_MISSING_PARENT, node.id, node.parentId),
       );
     }
 
@@ -306,7 +306,7 @@ export function createGraphEdges(
   isValidConnection: ValidConnectionFunc | null,
   findNode: Actions['findNode'],
   findEdge: Actions['findEdge'],
-  onError: FlowKitStore['emits']['error'],
+  onError: FlowItStore['emits']['error'],
   defaultEdgeOptions: DefaultEdgeOptions | undefined,
   nodes: GraphNode[],
   edges: GraphEdge[],
@@ -327,7 +327,7 @@ export function createGraphEdges(
 
     if (!sourceNode || !targetNode) {
       onError(
-        new FlowKitError(
+        new FlowItError(
           ErrorCode.EDGE_SOURCE_TARGET_MISSING,
           edge.id,
           edge.source,
@@ -339,14 +339,14 @@ export function createGraphEdges(
 
     if (!sourceNode) {
       onError(
-        new FlowKitError(ErrorCode.EDGE_SOURCE_MISSING, edge.id, edge.source),
+        new FlowItError(ErrorCode.EDGE_SOURCE_MISSING, edge.id, edge.source),
       );
       continue;
     }
 
     if (!targetNode) {
       onError(
-        new FlowKitError(ErrorCode.EDGE_TARGET_MISSING, edge.id, edge.target),
+        new FlowItError(ErrorCode.EDGE_TARGET_MISSING, edge.id, edge.target),
       );
       continue;
     }
@@ -360,7 +360,7 @@ export function createGraphEdges(
       });
 
       if (!isValid) {
-        onError(new FlowKitError(ErrorCode.EDGE_INVALID, edge.id));
+        onError(new FlowItError(ErrorCode.EDGE_INVALID, edge.id));
         continue;
       }
     }

@@ -7,12 +7,12 @@ import type {
   ViewportTransform,
 } from '../../types';
 import { PanOnScrollMode } from '../../types';
-import { setupKeyPress, useFlowKit } from '../../composables';
+import { setupKeyPress, useFlowIt } from '../../composables';
 import { setupResizeHandler } from '../../composables/useResizeHandler';
 import { clamp, isMacOs, wheelDelta } from '../../utils';
 
 export class ViewportElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowKit>;
+  private store!: ReturnType<typeof useFlowIt>;
   private cleanups: (() => void)[] = [];
 
   private isZoomingOrPanning = false;
@@ -27,8 +27,8 @@ export class ViewportElement extends HTMLElement {
   private zoomKeyPressed = false;
 
   connectedCallback() {
-    const id = this.closest('flow-kit')?.getAttribute('id') ?? undefined;
-    this.store = useFlowKit(id);
+    const id = this.closest('flow-it')?.getAttribute('id') ?? undefined;
+    this.store = useFlowIt(id);
 
     this.classList.add('flow__viewport', 'flow__container');
     this.store.viewportRef = this as unknown as HTMLDivElement;

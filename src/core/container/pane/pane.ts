@@ -1,6 +1,6 @@
 import type { EdgeChange, NodeChange } from '../../types';
 import { SelectionMode } from '../../types';
-import { useFlowKit, setupKeyPress } from '../../composables';
+import { useFlowIt, setupKeyPress } from '../../composables';
 import {
   areSetsEqual,
   getEventPosition,
@@ -10,7 +10,7 @@ import {
 import { getMousePosition } from './utils';
 
 export class PaneElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowKit>;
+  private store!: ReturnType<typeof useFlowIt>;
   private cleanups: (() => void)[] = [];
 
   private selectedNodeIds = new Set<string>();
@@ -23,7 +23,7 @@ export class PaneElement extends HTMLElement {
   private selectionKeyPressed = false;
 
   connectedCallback() {
-    this.store = useFlowKit();
+    this.store = useFlowIt();
 
     this.classList.add('flow__pane', 'flow__container');
 

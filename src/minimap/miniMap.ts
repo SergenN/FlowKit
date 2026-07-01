@@ -6,7 +6,7 @@ import {
   isMacOs,
   wheelDelta,
 } from '../core/utils';
-import { useFlowKit } from '../core/composables';
+import { useFlowIt } from '../core/composables';
 import { zoom, zoomIdentity } from 'd3-zoom';
 import type { D3ZoomEvent } from 'd3-zoom';
 import { pointer, select } from 'd3-selection';
@@ -17,7 +17,7 @@ const defaultWidth = 200;
 const defaultHeight = 150;
 
 export class MiniMapElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowKit>;
+  private store!: ReturnType<typeof useFlowIt>;
   private cleanups: (() => void)[] = [];
   private svgEl: SVGSVGElement | null = null;
   private nodeEls = new Map<string, HTMLElement>();
@@ -173,7 +173,7 @@ export class MiniMapElement extends HTMLElement {
   }
 
   connectedCallback() {
-    this.store = useFlowKit();
+    this.store = useFlowIt();
     this.setupStructure();
     this.setupZoom();
     this.render();

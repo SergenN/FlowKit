@@ -5,8 +5,8 @@ export default defineConfig({
     target: 'esnext',
     lib: {
       entry: 'src/core/main.ts',
-      name: 'FlowKit',
-      fileName: 'flow-kit',
+      name: 'FlowIt',
+      fileName: 'flow-it',
       formats: ['es', 'umd'],
     },
   },

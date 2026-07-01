@@ -1,10 +1,10 @@
-import { useFlowKit } from '../../composables';
+import { useFlowIt } from '../../composables';
 
 export class EdgeLabelRendererElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowKit>;
+  private store!: ReturnType<typeof useFlowIt>;
 
   connectedCallback() {
-    this.store = useFlowKit();
+    this.store = useFlowIt();
     this.render();
   }
 

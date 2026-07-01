@@ -2,7 +2,7 @@ import type {
   FlowProps,
   GraphEdge,
   GraphNode,
-  FlowKitStore,
+  FlowItStore,
   FlowHooksEmit,
   FlowHooksOn,
 } from '../types';
@@ -10,7 +10,7 @@ import { useActions, useGetters, useState } from '../store';
 
 export class Storage {
   public currentId = 0;
-  public flows = new Map<string, FlowKitStore>();
+  public flows = new Map<string, FlowItStore>();
   static instance: Storage;
 
   public static getInstance(): Storage {
@@ -18,7 +18,7 @@ export class Storage {
     return Storage.instance;
   }
 
-  public set(id: string, flow: FlowKitStore) {
+  public set(id: string, flow: FlowItStore) {
     return this.flows.set(id, flow);
   }
 
@@ -30,7 +30,7 @@ export class Storage {
     return this.flows.delete(id);
   }
 
-  public create(id: string, preloadedState?: FlowProps): FlowKitStore {
+  public create(id: string, preloadedState?: FlowProps): FlowItStore {
     const state = useState();
 
     const hooksOn = Object.fromEntries(
@@ -60,7 +60,7 @@ export class Storage {
 
     actions.setState({ ...state, ...preloadedState });
 
-    const flow: FlowKitStore = {
+    const flow: FlowItStore = {
       ...hooksOn,
       ...getters,
       ...actions,
@@ -68,7 +68,7 @@ export class Storage {
       nodeLookup,
       edgeLookup,
       emits,
-      flowKitVersion: '1.0.0',
+      FlowItVersion: '1.0.0',
       id,
       $destroy: () => {
         // Remove from the singleton registry first so no new lookups resolve

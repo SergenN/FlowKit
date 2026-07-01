@@ -1,4 +1,4 @@
-import { useFlowKit } from '../core/composables';
+import { useFlowIt } from '../core/composables';
 import type { FitViewParams } from '../core/types';
 import PlusIcon from './icons/plus.svg';
 import MinusIcon from './icons/minus.svg';
@@ -30,7 +30,7 @@ function makeButton(
 }
 
 export class ControlsElement extends HTMLElement {
-  private store!: ReturnType<typeof useFlowKit>;
+  private store!: ReturnType<typeof useFlowIt>;
   private cleanups: (() => void)[] = [];
 
   // Props with defaults
@@ -57,7 +57,7 @@ export class ControlsElement extends HTMLElement {
   }
 
   connectedCallback() {
-    this.store = useFlowKit();
+    this.store = useFlowIt();
     this.render();
 
     const onUpdate = () => this.updateButtonStates();

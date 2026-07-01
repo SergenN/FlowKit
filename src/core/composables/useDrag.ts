@@ -17,7 +17,7 @@ import {
   hasSelector,
   snapPosition,
 } from '../utils';
-import { useGetPointerPosition, useFlowKit } from '.';
+import { useGetPointerPosition, useFlowIt } from '.';
 
 export type UseDragEvent = D3DragEvent<HTMLDivElement, null, SubjectPosition>;
 
@@ -56,7 +56,7 @@ export function setupDrag(params: UseDragParams): () => void {
     addSelectedNodes,
     updateNodePositions,
     emits,
-  } = useFlowKit();
+  } = useFlowIt();
 
   const {
     onStart,

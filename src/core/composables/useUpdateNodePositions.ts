@@ -1,6 +1,6 @@
 import type { NodeDragItem, XYPosition } from '../types'
 import { calcNextPosition } from '../utils'
-import { useFlowKit } from './useFlowKit';
+import { useFlowIt } from './useFlowIt';
 
 /**
  * Composable for updating the position of nodes.
@@ -17,7 +17,7 @@ export function useUpdateNodePositions() {
     snapToGrid,
     nodesDraggable,
     emits,
-  } = useFlowKit();
+  } = useFlowIt();
 
   return (positionDiff: XYPosition, isShiftPressed = false) => {
     // by default a node moves 5px on each key press, or 20px if shift is pressed

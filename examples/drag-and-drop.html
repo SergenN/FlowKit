@@ -50,7 +50,7 @@
         aside .dnd-node.output { border-color: #ff0072; color: #ff0072; }
 
         /* Flow canvas */
-        flow-kit {
+        flow-it {
             display: block;
             flex: 1;
         }
@@ -69,11 +69,11 @@
     </aside>
 
     <!-- Flow canvas -->
-    <flow-kit id="my-flow" nodes-draggable elements-selectable fit-view-on-init>
+    <flow-it id="my-flow" nodes-draggable elements-selectable fit-view-on-init>
         <flow-background></flow-background>
         <flow-minimap></flow-minimap>
         <flow-controls></flow-controls>
-    </flow-kit>
+    </flow-it>
 
 </div>
 
@@ -83,7 +83,7 @@
 <script type="module" src="../src/controls/index.ts"></script>
 
 <script type="module">
-    customElements.whenDefined('flow-kit').then(() => {
+    customElements.whenDefined('flow-it').then(() => {
         const flowEl = document.querySelector('#my-flow')
         const store = flowEl.getStore()
 
@@ -106,7 +106,7 @@
         // Sidebar drag start — store node type in dataTransfer
         document.querySelectorAll('#dnd-sidebar .dnd-node').forEach(el => {
             el.addEventListener('dragstart', (event) => {
-                event.dataTransfer.setData('application/flowkit', el.dataset.nodeType)
+                event.dataTransfer.setData('application/FlowIt', el.dataset.nodeType)
                 event.dataTransfer.effectAllowed = 'move'
             })
         })
@@ -121,7 +121,7 @@
         flowEl.addEventListener('drop', (event) => {
             event.preventDefault()
 
-            const type = event.dataTransfer.getData('application/flowkit')
+            const type = event.dataTransfer.getData('application/FlowIt')
             if (!type) return
 
             // screenToFlowCoordinate handles container offset + viewport transform

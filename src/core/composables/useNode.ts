@@ -1,17 +1,17 @@
 import type { ElementData, GraphNode } from '../types';
-import { ErrorCode, FlowKitError, getConnectedEdges } from '../utils';
-import { useFlowKit } from './useFlowKit';
+import { ErrorCode, FlowItError, getConnectedEdges } from '../utils';
+import { useFlowIt } from './useFlowIt';
 
 export function useNode<Data = ElementData>(
   id: string,
   nodeEl?: HTMLElement | null,
 ) {
-  const { findNode, edges, emits } = useFlowKit();
+  const { findNode, edges, emits } = useFlowIt();
 
   const node = findNode<Data>(id);
 
   if (!node) {
-    emits.error(new FlowKitError(ErrorCode.NODE_NOT_FOUND, id));
+    emits.error(new FlowItError(ErrorCode.NODE_NOT_FOUND, id));
   }
 
   return {

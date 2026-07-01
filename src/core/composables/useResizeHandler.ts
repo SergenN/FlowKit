@@ -1,9 +1,9 @@
-import { ErrorCode, FlowKitError, getDimensions } from '../utils';
-import type { FlowKitStore } from '../types';
+import { ErrorCode, FlowItError, getDimensions } from '../utils';
+import type { FlowItStore } from '../types';
 
 export function setupResizeHandler(
   viewportEl: HTMLDivElement | null,
-  flowStore: FlowKitStore,
+  flowStore: FlowItStore,
 ): () => void {
   let resizeObserver: ResizeObserver | undefined;
 
@@ -16,7 +16,7 @@ export function setupResizeHandler(
 
     if (size.width === 0 || size.height === 0) {
       flowStore.emits.error(
-        new FlowKitError(ErrorCode.MISSING_VIEWPORT_DIMENSIONS),
+        new FlowItError(ErrorCode.MISSING_VIEWPORT_DIMENSIONS),
       );
     }
 

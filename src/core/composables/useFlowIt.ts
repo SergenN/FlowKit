@@ -1,7 +1,7 @@
-import type { EdgeChange, FlowProps, NodeChange, FlowKitStore } from '../types';
+import type { EdgeChange, FlowProps, NodeChange, FlowItStore } from '../types';
 import { Storage } from '../utils';
 
-export function useFlowKit(idOrOpts?: string | FlowProps): FlowKitStore {
+export function useFlowIt(idOrOpts?: string | FlowProps): FlowItStore {
   const storage = Storage.getInstance();
 
   const isOptsObj = typeof idOrOpts === 'object';
@@ -9,12 +9,12 @@ export function useFlowKit(idOrOpts?: string | FlowProps): FlowKitStore {
   const id = options?.id;
 
   // try to find existing store by id
-  let flowStore: FlowKitStore | undefined;
+  let flowStore: FlowItStore | undefined;
   if (id) {
     flowStore = storage.get(id);
   }
 
-  // If no id given, try to find the nearest flow-kit ancestor in the DOM
+  // If no id given, try to find the nearest flow-it ancestor in the DOM
   if (!flowStore && !id) {
     const el =
       (document.currentScript as any)?._caller ??
@@ -34,7 +34,7 @@ export function useFlowKit(idOrOpts?: string | FlowProps): FlowKitStore {
   return flowStore;
 }
 
-function wireDefaultHandlers(store: FlowKitStore): () => void {
+function wireDefaultHandlers(store: FlowItStore): () => void {
   const nodesChangeHandler = (changes: NodeChange[]) => {
     store.applyNodeChanges(changes);
   };

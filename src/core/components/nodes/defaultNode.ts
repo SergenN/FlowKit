@@ -1,6 +1,6 @@
 import type { HandleConnectable, NodeProps } from '../../types';
 import { Position } from '../../types';
-import { useFlowKit } from '../../composables';
+import { useFlowIt } from '../../composables';
 
 type NodeVariant = 'input' | 'output' | 'default';
 
@@ -16,11 +16,11 @@ type NodeVariant = 'input' | 'output' | 'default';
  * three variant names to this same "flow-default-node" tag.
  */
 export class DefaultNodeElement extends HTMLElement {
-  private store: ReturnType<typeof useFlowKit> | null = null;
+  private store: ReturnType<typeof useFlowIt> | null = null;
   private pendingProps: NodeProps<{ label: any }> | null = null;
 
   connectedCallback() {
-    this.store = useFlowKit();
+    this.store = useFlowIt();
     if (this.pendingProps) {
       this.render(this.pendingProps);
       this.pendingProps = null;

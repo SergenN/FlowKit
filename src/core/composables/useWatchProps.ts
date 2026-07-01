@@ -1,4 +1,4 @@
-import type { FlowProps, FlowKitStore } from '../types';
+import type { FlowProps, FlowItStore } from '../types';
 import { isDef } from '../utils';
 
 /**
@@ -7,7 +7,7 @@ import { isDef } from '../utils';
  */
 export function setupWatchProps(
   props: FlowProps,
-  store: FlowKitStore,
+  store: FlowItStore,
 ): () => void {
   const cleanups: (() => void)[] = [];
 
