@@ -5,9 +5,35 @@
     "type": "git",
     "url": "https://github.com/SergenN/FlowKit"
   },
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
-  "types": "dist/core/main.d.ts",
+  "main": "./dist/flow-kit.js",
+  "module": "./dist/flow-kit.js",
+  "types": "./dist/core/main.d.ts",
+  "sideEffects": [
+    "./dist/flow-kit.js",
+    "./dist/flow-kit.umd.cjs",
+    "./dist/minimap.js",
+    "./dist/background.js",
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/core/main.d.ts",
+      "import": "./dist/flow-kit.js",
+      "require": "./dist/flow-kit.umd.cjs"
+    },
+    "./minimap": {
+      "types": "./dist/minimap/index.d.ts",
+      "import": "./dist/minimap.js"
+    },
+    "./background": {
+      "types": "./dist/background/index.d.ts",
+      "import": "./dist/background.js"
+    },
+    "./style.css": "./dist/flow-kit.css",
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist"
   ],
