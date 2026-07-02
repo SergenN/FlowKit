@@ -66,18 +66,19 @@
     </select>
 </div>
 
-<iframe id="demo-frame" src="./examples/basic.html"></iframe>
+<iframe id="demo-frame"></iframe>
 
 <script>
     const select = document.getElementById('demo-select');
     const frame = document.getElementById('demo-frame');
 
-    // Restore last selected demo from session
+    // Pick initial demo once to avoid reloading iframe during startup.
     const saved = sessionStorage.getItem('selected-demo');
-    if (saved) {
-        select.value = saved;
-        frame.src = saved;
-    }
+    const initial = saved && Array.from(select.options).some(opt => opt.value === saved)
+        ? saved
+        : select.value;
+    select.value = initial;
+    frame.src = initial;
 
     select.addEventListener('change', () => {
         const url = select.value;
