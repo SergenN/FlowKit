@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/FlowJS/',
+  base: './',
   build: {
     outDir: 'dist-pages',
     rollupOptions: {
